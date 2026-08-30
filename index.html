@@ -8,7 +8,7 @@
 <title>EstateNova</title>
 <link rel="stylesheet" href="/app.css">
 <style>
-:root{--navy:#102e68;--gold:#f4b21b}*{box-sizing:border-box}html,body{margin:0;width:100%;min-height:100%;background:var(--navy);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}body{overflow-x:hidden}#boot-splash{min-height:100vh;width:100%;display:flex;align-items:center;justify-content:center;background:var(--navy);color:#fff;padding:32px 24px}.boot-brand{text-align:center;animation:bootIn .3s ease-out both}.boot-logo{width:92px;height:92px;margin:0 auto 20px;display:block}.boot-name{font-size:34px;line-height:1;font-weight:900;letter-spacing:1px}.boot-sub{margin-top:9px;font-size:11px;letter-spacing:5px;font-weight:700;opacity:.88}@keyframes bootIn{from{opacity:0;transform:scale(.98)}to{opacity:1;transform:none}}#app{display:none}
+:root{--navy:#102e68;--gold:#f4b21b}*{box-sizing:border-box}html,body{margin:0;width:100%;min-height:100%;background:var(--navy);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}body{overflow-x:hidden}#boot-splash{min-height:100vh;width:100%;display:flex;align-items:center;justify-content:center;background:var(--navy);color:#fff;padding:32px 24px}.boot-brand{text-align:center;animation:bootIn .3s ease-out both}.boot-logo{width:92px;height:92px;margin:0 auto 20px;display:block}.boot-name{font-size:34px;line-height:1;font-weight:900;letter-spacing:1px}.boot-sub{margin-top:9px;font-size:11px;letter-spacing:5px;font-weight:700;opacity:.88}.boot-status{margin-top:22px;font-size:12px;opacity:.72}@keyframes bootIn{from{opacity:0;transform:scale(.98)}to{opacity:1;transform:none}}#app{display:none}
 </style>
 </head>
 <body>
@@ -20,17 +20,22 @@
 <path d="M48 14v13" stroke="#f4b21b" stroke-width="5" stroke-linecap="round"/>
 </svg>
 <div class="boot-name">EstateNova</div><div class="boot-sub">REAL ESTATE</div>
+<div id="boot-status" class="boot-status">Starting…</div>
 </div>
 </main>
 <div id="app"></div>
 <script>
 (function(){
-var ready=false,done=false;
-function finish(){if(done)return;done=true;var splash=document.getElementById('boot-splash'),app=document.getElementById('app');splash.style.display='none';app.style.display='block';if(typeof window.go==='function')window.go('home');}
-function load(src,cb){var s=document.createElement('script');s.src=src;s.async=false;s.onload=function(){cb&&cb()};s.onerror=function(){console.error('EstateNova failed to load',src);};document.head.appendChild(s);}
-load('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',function(){load('/app.js',function(){ready=true;finish()})});
-setTimeout(finish,1000);
-setTimeout(function(){if(!ready){console.error('EstateNova startup exceeded 4 seconds');var a=document.getElementById('app');a.style.display='block';a.innerHTML='<main style="min-height:100vh;display:grid;place-items:center;background:#f7f8fb;color:#132039;padding:24px;text-align:center;font-family:system-ui"><div><h2>EstateNova</h2><p>Unable to start the application.</p><button onclick="location.reload()" style="padding:12px 18px;border:0;border-radius:12px;background:#1d4ed8;color:#fff;font-weight:700">Retry</button></div></main>'}},4000);
+'use strict';
+var splash=document.getElementById('boot-splash');
+var app=document.getElementById('app');
+var status=document.getElementById('boot-status');
+var started=false;
+function showError(message){status.textContent=message;app.style.display='block';app.innerHTML='<main style="min-height:100vh;display:grid;place-items:center;background:#f7f8fb;color:#132039;padding:24px;text-align:center;font-family:system-ui"><div><h2 style="margin:0 0 8px">EstateNova</h2><p style="margin:0 0 18px">Unable to start the application.</p><button onclick="location.reload()" style="padding:12px 18px;border:0;border-radius:12px;background:#1d4ed8;color:#fff;font-weight:700">Retry</button></div></main>';splash.style.display='none'}
+function loadScript(src){return new Promise(function(resolve,reject){var s=document.createElement('script');s.src=src;s.async=true;s.onload=function(){resolve()};s.onerror=function(){reject(new Error('Failed to load '+src))};document.head.appendChild(s)})}
+function startApp(){if(started)return;started=true;if(!window.supabase||typeof window.supabase.createClient!=='function'){showError('Database library could not be loaded.');return}status.textContent='Loading EstateNova…';loadScript('/app.js').then(function(){splash.style.display='none';app.style.display='block';if(typeof window.go==='function'){window.go('home',null)}}).catch(function(e){console.error('EstateNova app load failed',e);showError('Application failed to load.')})}
+status.textContent='Connecting…';
+loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2').then(startApp).catch(function(e){console.warn(e);status.textContent='Retrying connection…';return loadScript('https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js').then(startApp)}).catch(function(e){console.error(e);showError('Connection failed.')});
 })();
 </script>
 </body>
