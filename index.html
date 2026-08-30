@@ -52,7 +52,7 @@ async function start(){
   }
   if(!window.supabase||typeof window.supabase.createClient!=='function') throw new Error('Database library could not be loaded.');
   status.textContent='Loading EstateNova…';
-  await loadScript('/app-loader.js?v=estate-20260830-3');
+  await loadScript('/app-loader.js?v=estate-20260830-4');
   appScriptLoaded=true;
   if(window.estatenovaReady) await window.estatenovaReady;
   if(typeof window.go!=='function') throw new Error('EstateNova app controller did not initialize.');
