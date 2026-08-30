@@ -4,10 +4,9 @@
   const KEY='sb_publishable_j4O7PGss7-wWXkY5YnwyOw_i3X1p1l0';
   const CREATE=API+'/functions/v1/create-estatenova-user';
   window.doAuth=async function(){
-    const e=document.getElementById('ae')?.value.trim();
-    const p=document.getElementById('ap')?.value||'';
-    const m=document.getElementById('am');
-    const mode=window.st?.authMode||'login';
+    const e=document.getElementById('ae')?.value.trim(),p=document.getElementById('ap')?.value||'',m=document.getElementById('am');
+    const active=document.querySelector('.authswitch button.on')?.textContent||'Sign in';
+    const mode=active.toLowerCase().includes('create')?'signup':'login';
     if(!e||!p){if(m)m.textContent='Enter your email and password.';return}
     try{
       if(mode==='signup'){
@@ -16,9 +15,9 @@
         const cd=await cr.json().catch(()=>({}));
         if(!cr.ok)throw Error(cd.error||'Unable to create account.');
       }
-      const {data,error}=await window.supabase.createClient(API,KEY).auth.signInWithPassword({email:e,password:p});
-      if(error)throw error;
-      if(!data.session)throw Error('Unable to create a session.');
+      const client=window.supabase.createClient(API,KEY),r=await client.auth.signInWithPassword({email:e,password:p});
+      if(r.error)throw r.error;
+      if(!r.data.session)throw Error('Unable to create a session.');
       if(m)m.textContent='';
       if(typeof window.setPath==='function')window.setPath('/');
     }catch(x){if(m)m.textContent=x.message||'Unable to sign in.'}
