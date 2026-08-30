@@ -1,1 +1,76 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Cache-Control" content="no-store"><title>EstateNova Admin</title><style>*{box-sizing:border-box}body{margin:0;min-height:100vh;background:#050816;color:#fff;font-family:system-ui,-apple-system,sans-serif}.login{min-height:100vh;display:grid;place-items:center;background:radial-gradient(circle at 10% 0,#172b61,transparent 35%),radial-gradient(circle at 90% 0,#3c155c,transparent 32%),#050816}.card{width:min(440px,92%);padding:30px;border:1px solid #ffffff20;border-radius:26px;background:#0b1530ee;box-shadow:0 25px 80px #0008}.brand{font-size:30px;font-weight:900}.grad{color:#a78bfa}.eyebrow{font-size:10px;letter-spacing:3px;color:#91a0bf}input,button{width:100%;padding:14px;border-radius:13px;font:inherit}input{margin-top:10px;background:#07112a;border:1px solid #26375f;color:#fff}button{margin-top:16px;border:0;background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;font-weight:850;cursor:pointer}.error{margin-top:13px;color:#ff9eb3}.dash{max-width:1200px;margin:auto;padding:25px}.top{display:flex;justify-content:space-between;align-items:center;gap:15px}.top button{width:auto;margin:0}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:22px 0}.panel{background:#0b1530;border:1px solid #ffffff15;border-radius:18px;padding:20px}.n{font-size:30px;font-weight:900}.row{padding:14px 0;border-top:1px solid #ffffff15}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.actions button{width:auto;margin:0;padding:9px 12px}.ok{background:#18a874}.danger{background:#9d294a}.muted{color:#93a4c7}@media(max-width:700px){.grid{grid-template-columns:1fr 1fr}.top{align-items:flex-start}.top h1{font-size:24px}}</style></head><body><div id="root" class="login"><main class="card"><div class="brand">Estate<span class="grad">Nova</span></div><div class="eyebrow">PRIVATE ADMIN CONSOLE</div><h1>Admin sign in</h1><p>Authorized administrator access only.</p><input id="password" type="password" autocomplete="current-password" placeholder="Admin password"><button id="login">Sign in</button><div id="error" class="error"></div></main></div><script>const FN='https://bttujypzchanhvdmqutv.supabase.co/functions/v1/estatenova-admin-console';let token='';const el=id=>document.getElementById(id);function showError(m){el('error').textContent=m}async function login(){showError('');const password=el('password').value;if(!password){showError('Enter the admin password.');return}el('login').disabled=true;el('login').textContent='Signing in…';try{const r=await fetch(FN,{method:'POST',headers:{'content-type':'application/json'},cache:'no-store',body:JSON.stringify({action:'login',email:'satyanshraj774@gmail.com',password})});const j=await r.json();if(!r.ok||!j.ok)throw Error('Invalid admin password.');token=j.token;sessionStorage.setItem('estatenova_admin_session',token);showDashboard();await load()}catch(x){showError(x.message);el('login').disabled=false;el('login').textContent='Sign in'}}async function api(action,data={}){const r=await fetch(FN,{method:'POST',headers:{'content-type':'application/json','x-admin-token':token},cache:'no-store',body:JSON.stringify({action,...data})});if(r.status===401){sessionStorage.removeItem('estatenova_admin_session');token='';throw Error('Admin session expired. Please sign in again.')}if(!r.ok)throw Error('Admin service error.');return r.json()}function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}function showDashboard(){document.getElementById('root').className='';document.getElementById('root').innerHTML='<div class="dash"><div class="top"><div><div class="eyebrow">ESTATENOVA CONTROL CENTER</div><h1>Admin Dashboard</h1><div class="muted">Connected to EstateNova data</div></div><button onclick="logout()">Sign out</button></div><div id="app">Loading dashboard…</div></div>'}async function load(){const app=el('app');try{const d=await api('overview');const listings=Array.isArray(d.listings)?d.listings:[],users=Array.isArray(d.users)?d.users:[],inquiries=Array.isArray(d.inquiries)?d.inquiries:[],pending=listings.filter(x=>x.approval_status==='pending');app.innerHTML='<div class="grid"><div class="panel">Properties<div class="n">'+listings.length+'</div></div><div class="panel">Pending<div class="n">'+pending.length+'</div></div><div class="panel">Users<div class="n">'+users.length+'</div></div><div class="panel">Inquiries<div class="n">'+inquiries.length+'</div></div></div><div class="panel"><h2>Property approvals</h2>'+(!listings.length?'<p class="muted">No properties found.</p>':listings.map(x=>'<div class="row"><b>'+esc(x.title||'Untitled property')+'</b><div class="muted">'+esc(x.city||'')+' · '+esc(x.approval_status||'pending')+'</div><div class="actions"><button class="ok" onclick="act(\''+x.id+'\',\'approved\')">Approve</button><button onclick="act(\''+x.id+'\',\'rejected\')">Reject</button><button class="danger" onclick="del(\''+x.id+'\')">Delete</button></div></div>').join('')+'</div>'}catch(x){app.innerHTML='<div class="panel"><h2>Could not load dashboard</h2><p class="muted">'+esc(x.message)+'</p><button onclick="load()">Retry</button></div>'}}async function act(id,status){await api('approval',{id,status});await load()}async function del(id){if(confirm('Delete this property permanently?')){await api('delete_listing',{id});await load()}}function logout(){sessionStorage.removeItem('estatenova_admin_session');token='';location.reload()}el('login').onclick=login;el('password').onkeydown=x=>{if(x.key==='Enter')login()};const saved=sessionStorage.getItem('estatenova_admin_session');if(saved){token=saved;showDashboard();load()}</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-store">
+<title>EstateNova Admin</title>
+<style>
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:#050816;color:#fff;font-family:system-ui,-apple-system,sans-serif}.login{min-height:100vh;display:grid;place-items:center;background:radial-gradient(circle at 10% 0,#172b61,transparent 35%),radial-gradient(circle at 90% 0,#3c155c,transparent 32%),#050816}.card{width:min(440px,92%);padding:30px;border:1px solid #ffffff20;border-radius:26px;background:#0b1530ee;box-shadow:0 25px 80px #0008}.brand{font-size:30px;font-weight:900}.grad{color:#a78bfa}.eyebrow{font-size:10px;letter-spacing:3px;color:#91a0bf}input,button{width:100%;padding:14px;border-radius:13px;font:inherit}input{margin-top:10px;background:#07112a;border:1px solid #26375f;color:#fff}button{margin-top:16px;border:0;background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;font-weight:850;cursor:pointer}button:disabled{opacity:.65;cursor:wait}.error{margin-top:13px;color:#ff9eb3}.dash{max-width:1200px;margin:auto;padding:25px}.top{display:flex;justify-content:space-between;align-items:center;gap:15px}.top button{width:auto;margin:0}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:22px 0}.panel{background:#0b1530;border:1px solid #ffffff15;border-radius:18px;padding:20px}.n{font-size:30px;font-weight:900}.row{padding:14px 0;border-top:1px solid #ffffff15}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.actions button{width:auto;margin:0;padding:9px 12px}.ok{background:#18a874}.danger{background:#9d294a}.muted{color:#93a4c7}@media(max-width:700px){.grid{grid-template-columns:1fr 1fr}.top{align-items:flex-start}.top h1{font-size:24px}}@media(max-width:450px){.card{padding:24px}}
+</style>
+</head>
+<body>
+<div id="root" class="login">
+<main class="card">
+<div class="brand">Estate<span class="grad">Nova</span></div>
+<div class="eyebrow">PRIVATE ADMIN CONSOLE</div>
+<h1>Admin sign in</h1>
+<p>Authorized administrator access only.</p>
+<input id="password" type="password" autocomplete="current-password" placeholder="Admin password">
+<button id="login" type="button">Sign in</button>
+<div id="error" class="error"></div>
+</main>
+</div>
+<script>
+'use strict';
+const FN='https://bttujypzchanhvdmqutv.supabase.co/functions/v1/estatenova-admin-console';
+let token='';
+const el=id=>document.getElementById(id);
+function esc(value){return String(value??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');}
+function showError(message){el('error').textContent=message||'';}
+async function login(){
+ showError('');
+ const password=el('password').value;
+ if(!password){showError('Enter the admin password.');return;}
+ const button=el('login');button.disabled=true;button.textContent='Signing in…';
+ try{
+  const response=await fetch(FN,{method:'POST',headers:{'content-type':'application/json'},cache:'no-store',body:JSON.stringify({action:'login',email:'satyanshraj774@gmail.com',password})});
+  const data=await response.json();
+  if(!response.ok||!data.ok)throw new Error('Invalid admin password.');
+  token=data.token;
+  sessionStorage.setItem('estatenova_admin_session',token);
+  showDashboard();
+  await load();
+ }catch(error){showError(error.message||'Sign in failed.');button.disabled=false;button.textContent='Sign in';}
+}
+async function api(action,data={}){
+ const response=await fetch(FN,{method:'POST',headers:{'content-type':'application/json','x-admin-token':token},cache:'no-store',body:JSON.stringify({action,...data})});
+ if(response.status===401){sessionStorage.removeItem('estatenova_admin_session');token='';throw new Error('Admin session expired. Please sign in again.');}
+ if(!response.ok)throw new Error('Admin service error.');
+ return response.json();
+}
+function showDashboard(){
+ el('root').className='';
+ el('root').innerHTML='<div class="dash"><div class="top"><div><div class="eyebrow">ESTATENOVA CONTROL CENTER</div><h1>Admin Dashboard</h1><div class="muted">Connected to EstateNova data</div></div><button type="button" onclick="logout()">Sign out</button></div><div id="app">Loading dashboard…</div></div>';
+}
+async function load(){
+ const app=el('app');
+ try{
+  const data=await api('overview');
+  const listings=Array.isArray(data.listings)?data.listings:[];
+  const users=Array.isArray(data.users)?data.users:[];
+  const inquiries=Array.isArray(data.inquiries)?data.inquiries:[];
+  const pending=listings.filter(item=>item.approval_status==='pending');
+  app.innerHTML='<div class="grid"><div class="panel">Properties<div class="n">'+listings.length+'</div></div><div class="panel">Pending<div class="n">'+pending.length+'</div></div><div class="panel">Users<div class="n">'+users.length+'</div></div><div class="panel">Inquiries<div class="n">'+inquiries.length+'</div></div></div><div class="panel"><h2>Property approvals</h2>'+(listings.length?listings.map(item=>'<div class="row"><b>'+esc(item.title||'Untitled property')+'</b><div class="muted">'+esc(item.city||'')+' · '+esc(item.approval_status||'pending')+'</div><div class="actions"><button class="ok" type="button" onclick="act(\''+esc(item.id)+'\',\'approved\')">Approve</button><button type="button" onclick="act(\''+esc(item.id)+'\',\'rejected\')">Reject</button><button class="danger" type="button" onclick="del(\''+esc(item.id)+'\')">Delete</button></div></div>').join(''):'<p class="muted">No properties found.</p>')+'</div>';
+ }catch(error){app.innerHTML='<div class="panel"><h2>Could not load dashboard</h2><p class="muted">'+esc(error.message)+'</p><button type="button" onclick="load()">Retry</button></div>';}
+}
+async function act(id,status){try{await api('approval',{id,status});await load();}catch(error){alert(error.message);}}
+async function del(id){if(confirm('Delete this property permanently?')){try{await api('delete_listing',{id});await load();}catch(error){alert(error.message);}}}
+function logout(){sessionStorage.removeItem('estatenova_admin_session');token='';location.reload();}
+el('login').addEventListener('click',login);
+el('password').addEventListener('keydown',event=>{if(event.key==='Enter')login();});
+const saved=sessionStorage.getItem('estatenova_admin_session');
+if(saved){token=saved;showDashboard();load();}
+</script>
+</body>
+</html>
