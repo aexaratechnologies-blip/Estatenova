@@ -1,7 +1,7 @@
 // EstateNova isolated application loader
 'use strict';
 
-(async function(){
+window.estatenovaReady = (async function(){
   try {
     const response = await fetch('/app.js?v=estate-20260830-3', {cache:'no-store'});
     if (!response.ok) throw new Error('Failed to load EstateNova application (' + response.status + ').');
@@ -13,8 +13,10 @@
     (function(){
       eval(source + '\nwindow.state=state; window.render=render; window.toggleSave=toggleSave; window.loadListings=loadListings;');
     })();
+    return true;
   } catch (error) {
     console.error('EstateNova isolated loader failed:', error);
     window.dispatchEvent(new CustomEvent('estatenova-loader-error', {detail:error}));
+    throw error;
   }
 })();
