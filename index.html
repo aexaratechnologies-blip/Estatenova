@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#102e68">
 <meta name="description" content="EstateNova — India real estate marketplace.">
 <title>EstateNova</title>
-<link rel="stylesheet" href="/app.css?v=estate-20260830-2">
+<link rel="stylesheet" href="/app.css?v=estate-20260830-3">
 <style>
 :root{--navy:#102e68;--gold:#f4b21b}*{box-sizing:border-box}html,body{margin:0;width:100%;min-height:100%;background:var(--navy);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}body{overflow-x:hidden}#boot-splash{min-height:100vh;width:100%;display:flex;align-items:center;justify-content:center;background:var(--navy);color:#fff;padding:32px 24px}.boot-brand{text-align:center;animation:bootIn .3s ease-out both}.boot-logo{width:92px;height:92px;margin:0 auto 20px;display:block}.boot-name{font-size:34px;line-height:1;font-weight:900;letter-spacing:1px}.boot-sub{margin-top:9px;font-size:11px;letter-spacing:5px;font-weight:700;opacity:.88}.boot-status{margin-top:22px;font-size:12px;opacity:.72}@keyframes bootIn{from{opacity:0;transform:scale(.98)}to{opacity:1;transform:none}}#app{display:none;min-height:100vh}
 #boot-error{display:none;min-height:100vh;place-items:center;background:#f7f8fb;color:#132039;padding:24px;text-align:center}#boot-error button{padding:12px 18px;border:0;border-radius:12px;background:#1d4ed8;color:#fff;font-weight:700}
@@ -40,6 +40,7 @@ var lastError='';
 function showError(message){if(appStarted)return;lastError=String(message||'Startup error');console.error('EstateNova startup:',lastError);status.textContent='Startup error';splash.style.display='none';app.style.display='none';errorText.textContent=lastError;errorBox.style.display='grid'}
 window.addEventListener('error',function(e){if(!appScriptLoaded) return;showError(e.message||'JavaScript error while starting EstateNova')});
 window.addEventListener('unhandledrejection',function(e){if(!appScriptLoaded) return;var r=e.reason;showError(r&&r.message?r.message:'Unhandled startup error')});
+window.addEventListener('estatenova-loader-error',function(e){showError(e.detail&&e.detail.message?e.detail.message:'Application loader failed.')});
 function loadScript(src){return new Promise(function(resolve,reject){var s=document.createElement('script');s.src=src;s.async=false;s.onload=function(){resolve()};s.onerror=function(){reject(new Error('Failed to load '+src))};document.head.appendChild(s)})}
 function hasApp(){return !!(app && app.innerHTML && app.innerHTML.trim().length>20)}
 function reveal(){if(appStarted)return;if(!hasApp())return false;appStarted=true;splash.style.display='none';errorBox.style.display='none';app.style.display='block';return true}
@@ -51,11 +52,12 @@ async function start(){
   }
   if(!window.supabase||typeof window.supabase.createClient!=='function') throw new Error('Database library could not be loaded.');
   status.textContent='Loading EstateNova…';
-  await loadScript('/app.js?v=estate-20260830-2');
+  await loadScript('/app-loader.js?v=estate-20260830-3');
   appScriptLoaded=true;
+  if(window.estatenovaReady) await window.estatenovaReady;
   if(typeof window.go!=='function') throw new Error('EstateNova app controller did not initialize.');
   app.style.display='block';
-  window.go('home',null);
+  await window.go('home',null);
   setTimeout(function(){
    if(reveal())return;
    try{window.go('home',null)}catch(e){showError(e.message||'Home screen failed to render.')}
