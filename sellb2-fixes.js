@@ -1,9 +1,12 @@
 'use strict';
 (function(){
   const originalSetPath=window.setPath;
-  window.setPath=function(p){originalSetPath(p);if(['/properties','/vehicles','/businesses'].includes(p))setTimeout(()=>window.load&&window.load(),0)};
-  window.setPath=window.setPath;
-  const oldProfileEdit=window.profileEdit;
-  window.profileEdit=oldProfileEdit;
+  if(typeof originalSetPath==='function' && !window.__sellb2PathPatched){
+    window.__sellb2PathPatched=true;
+    window.setPath=function(p){
+      originalSetPath(p);
+      if(['/properties','/vehicles','/businesses'].includes(p) && typeof window.load==='function')setTimeout(()=>window.load(),0);
+    };
+  }
   window.fixSellB2Ready=true;
 })();
