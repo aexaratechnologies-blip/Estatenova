@@ -34,29 +34,27 @@ body{overflow:hidden}
 <div id="app"></div>
 <script>
 (function(){
-  var started=false;
-  function loadScript(src,done){
+  var appReady=false,minimumSplashDone=false,finished=false;
+  function finish(){
+    if(finished||!appReady||!minimumSplashDone)return;
+    finished=true;
+    try{localStorage.setItem('en_seen','1')}catch(e){}
+    document.getElementById('boot-splash').style.display='none';
+    document.getElementById('app').style.display='block';
+    if(typeof window.go==='function')window.go('home');
+  }
+  function load(src,done){
     var s=document.createElement('script');
     s.src=src;
     s.onload=function(){if(done)done()};
     s.onerror=function(){console.error('EstateNova failed to load:',src)};
     document.head.appendChild(s);
   }
-  function bootApp(){
-    loadScript('/app.js',function(){
-      try{localStorage.setItem('en_seen','1')}catch(e){}
-      document.getElementById('boot-splash').style.display='none';
-      document.getElementById('app').style.display='block';
-      if(typeof window.go==='function')window.go('home');
-    });
-  }
-  setTimeout(function(){
-    if(started)return;
-    started=true;
-    // Load the dependency first. The visible splash stays on screen until
-    // the actual application bundle has loaded successfully.
-    loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',bootApp);
-  },1000);
+  // Start loading dependencies immediately while the 1-second splash is visible.
+  load('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',function(){
+    load('/app.js',function(){appReady=true;finish()});
+  });
+  setTimeout(function(){minimumSplashDone=true;finish()},1000);
 })();
 </script>
 </body>
