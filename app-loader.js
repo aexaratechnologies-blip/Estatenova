@@ -15,12 +15,26 @@ window.estatenovaReady = (async function(){
     const sellerPatchResponse = await fetch('/seller-listing-v2.js?v=estate-20260830-2', {cache:'no-store'});
     if (!sellerPatchResponse.ok) throw new Error('Failed to load EstateNova seller listing module.');
     const sellerPatch = await sellerPatchResponse.text();
+    const sellerPhotoQueueResponse = await fetch('/seller-photo-queue-v2.js?v=estate-20260830-1', {cache:'no-store'});
+    if (!sellerPhotoQueueResponse.ok) throw new Error('Failed to load EstateNova seller photo queue.');
+    const sellerPhotoQueuePatch = await sellerPhotoQueueResponse.text();
 
     // Execute all application modules in one private scope so they share the
     // same state/db/render bindings while avoiding browser-global collisions.
     (function(){
-      eval(locationSource + '\n' + source + '\n' + filterPatch + '\n' + sellerPatch + '\nwindow.state=state; window.render=render; window.toggleSave=toggleSave; window.loadListings=loadListings;');
+      eval(locationSource + '\n' + source + '\n' + filterPatch + '\n' + sellerPatch + '\n' + sellerPhotoQueuePatch + '\nwindow.state=state; window.render=render; window.toggleSave=toggleSave; window.loadListings=loadListings;');
     })();
+
+    if(window.render && window.enInstallSellerPhotoQueue){
+      const originalRender=window.render;
+      window.render=async function(){
+        const result=await originalRender.apply(this,arguments);
+        window.enInstallSellerPhotoQueue();
+        return result;
+      };
+      window.enInstallSellerPhotoQueue();
+    }
+
     if(window.estatenovaLocationReady) await window.estatenovaLocationReady;
     return true;
   } catch (error) {
