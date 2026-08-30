@@ -1,1 +1,23 @@
-{"rewrites":[{"source":"/","destination":"/index.html"},{"source":"/onboarding","destination":"/index.html"},{"source":"/properties","destination":"/index.html"},{"source":"/property/:id","destination":"/index.html"},{"source":"/filters","destination":"/index.html"},{"source":"/saved","destination":"/index.html"},{"source":"/messages","destination":"/index.html"},{"source":"/profile","destination":"/index.html"},{"source":"/profile-edit","destination":"/index.html"},{"source":"/auth","destination":"/index.html"},{"source":"/post","destination":"/index.html"},{"source":"/admin","destination":"/admin-login.html"},{"source":"/admin-dashboard","destination":"/admin-dashboard.html"},{"source":"/admin-users","destination":"/admin-users.html"},{"source":"/admin-properties","destination":"/admin-properties.html"},{"source":"/admin-pending","destination":"/admin-pending.html"},{"source":"/admin-inquiries","destination":"/admin-inquiries.html"},{"source":"/legal","destination":"/legal.html"}]}
+{
+  "rewrites": [
+    {"source":"/","destination":"/index.html"},
+    {"source":"/onboarding","destination":"/index.html"},
+    {"source":"/properties","destination":"/index.html"},
+    {"source":"/property/:id","destination":"/index.html"},
+    {"source":"/filters","destination":"/index.html"},
+    {"source":"/saved","destination":"/index.html"},
+    {"source":"/messages","destination":"/index.html"},
+    {"source":"/messages/:id","destination":"/index.html"},
+    {"source":"/profile","destination":"/index.html"},
+    {"source":"/profile-edit","destination":"/index.html"},
+    {"source":"/auth","destination":"/index.html"},
+    {"source":"/post","destination":"/index.html"},
+    {"source":"/admin","destination":"/admin-login.html"},
+    {"source":"/admin-dashboard","destination":"/admin-dashboard.html"},
+    {"source":"/admin-users","destination":"/admin-users.html"},
+    {"source":"/admin-properties","destination":"/admin-properties.html"},
+    {"source":"/admin-pending","destination":"/admin-pending.html"},
+    {"source":"/admin-inquiries","destination":"/admin-inquiries.html"},
+    {"source":"/legal","destination":"/legal.html"}
+  ]
+}
