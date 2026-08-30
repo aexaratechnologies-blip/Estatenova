@@ -1,1 +1,76 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#102e68"><title>SELLB2 — Buy & Sell</title><link rel="stylesheet" href="/app.css?v=sellb2-10"><link rel="stylesheet" href="/sellb2.css?v=sellb2-10"><style>*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#102e68;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}#boot-splash{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:linear-gradient(145deg,#0d2860,#173b80);color:#fff;transition:opacity .18s ease}.boot-brand{text-align:center}.boot-logo{width:104px;height:104px;margin:0 auto 22px}.boot-name{font-size:38px;font-weight:900;letter-spacing:-1px}.boot-name span{color:#8b7cf5}.boot-sub{margin-top:10px;font-size:11px;letter-spacing:4px;font-weight:800;opacity:.82}#app{display:block;min-height:100vh}.boot-home{min-height:100vh;background:#fff;color:#172033;padding:28px 20px 100px}.boot-home header{display:flex;justify-content:space-between;align-items:center;max-width:1120px;margin:auto}.boot-home .brand{font-size:27px;font-weight:950}.boot-home .brand span{color:#7568ee}.boot-home .sign{border:0;border-radius:12px;padding:11px 17px;background:#102e68;color:#fff;font-weight:800}.boot-hero{max-width:1120px;margin:50px auto 0;padding:50px 30px;border-radius:30px;background:linear-gradient(145deg,#102e68,#294e93);color:#fff}.boot-hero h1{font-size:clamp(38px,7vw,70px);line-height:.98;margin:12px 0}.boot-hero em{font-style:normal;color:#9c8cff}.boot-hero p{max-width:580px;line-height:1.6;opacity:.86}.boot-search{margin-top:28px;display:flex;gap:10px;max-width:700px}.boot-search input{flex:1;padding:16px;border:0;border-radius:14px;font-size:15px}.boot-search button{padding:0 22px;border:0;border-radius:14px;background:#fff;color:#102e68;font-weight:900}</style></head><body><div id="boot-splash"><div class="boot-brand"><svg class="boot-logo" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="8" y="8" width="80" height="80" rx="24" fill="#fff" fill-opacity=".08" stroke="#fff" stroke-opacity=".45" stroke-width="2"/><path d="M23 46 48 25l25 21v25H23V46Z" stroke="#fff" stroke-width="5" stroke-linejoin="round"/><path d="M34 71V52h28v19M30 45h36" stroke="#8b7cf5" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M48 25v10" stroke="#8b7cf5" stroke-width="5" stroke-linecap="round"/></svg><div class="boot-name">SELL<span>B2</span></div><div class="boot-sub">BUY · SELL · DISCOVER</div></div></div><div id="app"><main class="boot-home"><header><div class="brand">SELL<span>B2</span></div><button class="sign" onclick="location.href='/auth'">Sign in</button></header><section class="boot-hero"><small>INDIA MARKETPLACE</small><h1>Buy. Sell.<br><em>Move forward.</em></h1><p>Find properties, vehicles and businesses listed by members across India.</p><div class="boot-search"><input id="quick-search" placeholder="Search city, district, locality or listing…"><button onclick="location.href='/properties'">Search</button></div></section></main></div><script>(function(){var splash=document.getElementById('boot-splash');function add(src){var s=document.createElement('script');s.src=src;s.async=true;document.head.appendChild(s)}try{add('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2');add('/location-data-v1.js?v=sellb2-10');add('/sellb2.js?v=sellb2-10');add('/sellb2-fixes.js?v=sellb2-10')}catch(e){console.error(e)}setTimeout(function(){splash.style.opacity='0';setTimeout(function(){splash.remove()},180)},1000)})();</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#102b63">
+  <meta name="description" content="EstateNova — properties marketplace">
+  <title>EstateNova — Buy & Sell Properties</title>
+  <link rel="stylesheet" href="/app.css?v=estate-20260830-6">
+  <style>
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;background:#f7f8fb}
+    #boot{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:linear-gradient(145deg,#102b63,#193c7f);color:#fff;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;transition:opacity .2s ease}
+    #boot.hide{opacity:0;pointer-events:none}
+    .boot-inner{text-align:center;padding:24px}
+    .boot-mark{width:78px;height:78px;margin:0 auto 18px;border-radius:22px;border:1px solid #ffffff55;background:#ffffff12;display:grid;place-items:center;font-size:32px;font-weight:900}
+    .boot-name{font-size:32px;font-weight:900;letter-spacing:-1px}
+    .boot-name span{color:#8b7cf5}
+    .boot-status{margin-top:9px;font-size:12px;opacity:.75}
+    #boot-error{display:none;max-width:360px;margin:18px auto 0;padding:12px 14px;border:1px solid #ffffff33;border-radius:12px;background:#0002;font-size:12px;line-height:1.5}
+  </style>
+</head>
+<body>
+  <div id="boot">
+    <div class="boot-inner">
+      <div class="boot-mark">EN</div>
+      <div class="boot-name">Estate<span>Nova</span></div>
+      <div class="boot-status" id="boot-status">Loading marketplace…</div>
+      <div id="boot-error"></div>
+    </div>
+  </div>
+
+  <div id="app"></div>
+
+  <script>
+    (async function(){
+      const status=document.getElementById('boot-status');
+      const errorBox=document.getElementById('boot-error');
+      const boot=document.getElementById('boot');
+      const setStatus=(text)=>{status.textContent=text};
+      const loadScript=(src)=>new Promise((resolve,reject)=>{
+        const s=document.createElement('script');
+        s.src=src;
+        s.async=false;
+        s.onload=resolve;
+        s.onerror=()=>reject(new Error('Failed to load '+src));
+        document.head.appendChild(s);
+      });
+
+      try{
+        setStatus('Connecting to marketplace…');
+        await loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2');
+        if(!window.supabase) throw new Error('Supabase client did not load.');
+
+        setStatus('Loading application…');
+        await loadScript('/app-loader.js?v=estate-20260830-6');
+        if(window.estatenovaReady) await window.estatenovaReady;
+
+        if(typeof window.render==='function') await window.render();
+        if(typeof window.render==='function'){
+          setStatus('Ready');
+          setTimeout(()=>boot.classList.add('hide'),120);
+          setTimeout(()=>boot.remove(),420);
+        }else{
+          throw new Error('EstateNova application did not initialize.');
+        }
+      }catch(error){
+        console.error('EstateNova startup failed:',error);
+        setStatus('Unable to start the marketplace');
+        errorBox.style.display='block';
+        errorBox.textContent='Please refresh once. If this persists, the application loader or one of its modules failed to load.';
+      }
+    })();
+  </script>
+</body>
+</html>
