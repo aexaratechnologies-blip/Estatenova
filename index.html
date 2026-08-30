@@ -1,1 +1,84 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#102e68"><meta name="description" content="SELLB2 — India marketplace for properties, vehicles and businesses."><title>SELLB2 — Buy & Sell Properties, Vehicles & Businesses</title><link rel="stylesheet" href="/app.css?v=sellb2-4"><link rel="stylesheet" href="/sellb2.css?v=sellb2-3"><style>:root{--navy:#102e68}*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#102e68;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}#boot-splash{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(145deg,#0d2860,#173b80);color:#fff;padding:24px}.boot-brand{text-align:center;animation:bootIn .35s ease-out both}.boot-logo{width:104px;height:104px;margin:0 auto 22px}.boot-name{font-size:38px;font-weight:900;letter-spacing:-1px}.boot-name span{color:#8b7cf5}.boot-sub{margin-top:10px;font-size:11px;letter-spacing:4px;font-weight:800;opacity:.82}.boot-error{max-width:320px;line-height:1.5;opacity:.9}.boot-error button{margin-top:12px}@keyframes bootIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}#app{display:none;min-height:100vh}</style></head><body><main id="boot-splash" aria-label="SELLB2"><div class="boot-brand"><svg class="boot-logo" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="8" y="8" width="80" height="80" rx="24" fill="#fff" fill-opacity=".08" stroke="#fff" stroke-opacity=".45" stroke-width="2"/><path d="M23 46 48 25l25 21v25H23V46Z" stroke="#fff" stroke-width="5" stroke-linejoin="round"/><path d="M34 71V52h28v19M30 45h36" stroke="#8b7cf5" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M48 25v10" stroke="#8b7cf5" stroke-width="5" stroke-linecap="round"/></svg><div class="boot-name">SELL<span>B2</span></div><div class="boot-sub">BUY · SELL · DISCOVER</div></div></main><div id="app"></div><script>(async()=>{const splash=document.getElementById('boot-splash'),app=document.getElementById('app');let settled=false,stage='starting';const showError=(message)=>{if(settled)return;settled=true;console.error('SELLB2 startup:',stage,message);splash.innerHTML='<div class="boot-brand"><div class="boot-name">SELL<span>B2</span></div><p class="boot-error">Unable to start the marketplace.<br>Please refresh and try again.</p><button onclick="location.reload()">Retry</button></div>'};const loadScript=(src,label)=>new Promise((resolve,reject)=>{const s=document.createElement('script');s.src=src;s.onload=resolve;s.onerror=()=>reject(new Error(label+' failed to load'));document.head.append(s)});try{stage='loading Supabase';try{await loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2','Supabase library')}catch(primary){await loadScript('https://unpkg.com/@supabase/supabase-js@2','Supabase fallback library')}stage='loading marketplace';await loadScript('/sellb2.js?v=sellb2-4','Marketplace application');stage='loading compatibility patch';await loadScript('/sellb2-fixes.js?v=sellb2-3','Marketplace compatibility patch');stage='starting marketplace';const started=Date.now();const reveal=()=>{if(settled)return;if(app.innerHTML.trim()){settled=true;splash.style.display='none';app.style.display='block';return}if(Date.now()-started>12000){showError('Application did not render within 12 seconds');return}setTimeout(reveal,100)};reveal();stage='loading location data';loadScript('/location-data-v1.js?v=sellb2-3','Location data').then(()=>{if(window.estatenovaLocationReady)window.estatenovaLocationReady.then(()=>{if(typeof window.render==='function')window.render()}).catch(()=>{})}).catch(e=>console.warn('SELLB2 optional location data:',e.message))}catch(e){showError(e.message||'Startup failed')}})();</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#102e68">
+<meta name="description" content="SELLB2 — India marketplace for properties, vehicles and businesses.">
+<title>SELLB2 — Buy & Sell Properties, Vehicles & Businesses</title>
+<link rel="stylesheet" href="/app.css?v=sellb2-5">
+<link rel="stylesheet" href="/sellb2.css?v=sellb2-5">
+<style>
+:root{--navy:#102e68}*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#102e68;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}#boot-splash{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(145deg,#0d2860,#173b80);color:#fff;padding:24px}.boot-brand{text-align:center;animation:bootIn .35s ease-out both}.boot-logo{width:104px;height:104px;margin:0 auto 22px}.boot-name{font-size:38px;font-weight:900;letter-spacing:-1px}.boot-name span{color:#8b7cf5}.boot-sub{margin-top:10px;font-size:11px;letter-spacing:4px;font-weight:800;opacity:.82}.boot-error{max-width:330px;line-height:1.5;opacity:.9}.boot-error button{margin-top:12px}@keyframes bootIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}#app{display:none;min-height:100vh}
+</style>
+</head>
+<body>
+<main id="boot-splash" aria-label="SELLB2">
+<div class="boot-brand">
+<svg class="boot-logo" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="8" y="8" width="80" height="80" rx="24" fill="#fff" fill-opacity=".08" stroke="#fff" stroke-opacity=".45" stroke-width="2"/><path d="M23 46 48 25l25 21v25H23V46Z" stroke="#fff" stroke-width="5" stroke-linejoin="round"/><path d="M34 71V52h28v19M30 45h36" stroke="#8b7cf5" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M48 25v10" stroke="#8b7cf5" stroke-width="5" stroke-linecap="round"/></svg>
+<div class="boot-name">SELL<span>B2</span></div><div class="boot-sub">BUY · SELL · DISCOVER</div>
+</div>
+</main>
+<div id="app"></div>
+<script>
+(function(){
+'use strict';
+const splash=document.getElementById('boot-splash');
+const app=document.getElementById('app');
+let finished=false;
+function fail(stage,error){
+ if(finished)return;
+ finished=true;
+ console.error('SELLB2 startup failure:',stage,error);
+ splash.innerHTML='<div class="boot-brand"><div class="boot-name">SELL<span>B2</span></div><p class="boot-error">SELLB2 could not start.<br>The application loader failed at: <b>'+String(stage).replace(/[<>]/g,'')+'</b></p><button onclick="location.reload()">Retry</button></div>';
+}
+function loadScript(src,stage,timeout){
+ return new Promise(function(resolve,reject){
+  var s=document.createElement('script');
+  var done=false;
+  var timer=setTimeout(function(){if(done)return;done=true;s.remove();reject(new Error(stage+' timed out'))},timeout||15000);
+  s.async=false;
+  s.src=src;
+  s.onload=function(){if(done)return;done=true;clearTimeout(timer);resolve()};
+  s.onerror=function(){if(done)return;done=true;clearTimeout(timer);reject(new Error(stage+' failed to load'))};
+  document.head.appendChild(s);
+ });
+}
+async function loadFirst(list,stage){
+ let last;
+ for(const src of list){
+  try{await loadScript(src,stage,15000);if(window.supabase&&typeof window.supabase.createClient==='function')return;last=new Error(stage+' loaded without a usable global')}
+  catch(e){last=e}
+ }
+ throw last||new Error(stage+' unavailable');
+}
+async function start(){
+ try{
+  await loadFirst([
+   'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js',
+   'https://unpkg.com/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js',
+   'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js',
+   'https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js'
+  ],'Supabase library');
+  await loadScript('/sellb2.js?v=sellb2-5','Marketplace application',20000);
+  try{await loadScript('/sellb2-fixes.js?v=sellb2-5','Marketplace compatibility patch',10000)}catch(e){console.warn('Optional compatibility patch skipped:',e)}
+  var startTime=Date.now();
+  function reveal(){
+   if(finished)return;
+   if(app.innerHTML.trim()){finished=true;splash.style.display='none';app.style.display='block';return}
+   if(Date.now()-startTime>20000){fail('marketplace render',new Error('No application markup was produced')) ;return}
+   setTimeout(reveal,100);
+  }
+  reveal();
+  try{
+   loadScript('/location-data-v1.js?v=sellb2-5','Optional location data',15000).then(function(){
+    if(window.estatenovaLocationReady)window.estatenovaLocationReady.then(function(){if(typeof window.render==='function')window.render()}).catch(function(){});
+   }).catch(function(e){console.warn('Optional location data unavailable:',e)});
+  }catch(e){console.warn(e)}
+ }catch(e){fail('startup',e)}
+}
+start();
+})();
+</script>
+</body>
+</html>
