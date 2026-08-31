@@ -1,6 +1,6 @@
 'use strict';
 
-// SELLB2 compatibility loader.
-// The production entrypoint is index.html -> sellb2.js.
-// This file intentionally contains no legacy product branding or legacy app boot logic.
+// SELLB2 compatibility loader. Legacy application boot is disabled.
+// index.html owns the SELLB2 startup sequence.
 window.sellb2LoaderReady = Promise.resolve(true);
+window.sellb2LegacyDisabled = true;
