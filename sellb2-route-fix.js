@@ -1,7 +1,7 @@
 (function(){
   'use strict';
   function install(){
-    if(typeof window.render!=='function'||typeof window.load!=='function'||typeof window.st==='undefined')return setTimeout(install,50);
+    if(typeof window.render!=='function'||typeof window.load!=='function')return setTimeout(install,50);
     if(window.__sellb2RouteFixInstalled)return;
     window.__sellb2RouteFixInstalled=true;
 
