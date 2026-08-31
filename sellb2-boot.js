@@ -10,8 +10,8 @@
   });
   async function loadSupabase(){
     const urls=[
-      'https://unpkg.com/@supabase/supabase-js@2.112.4/dist/umd/supabase.js',
-      'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4/dist/umd/supabase.min.js'
+      'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
+      'https://unpkg.com/@supabase/supabase-js@2'
     ];
     let last;
     for(const u of urls){try{await loadScript(u);if(window.supabase&&typeof window.supabase.createClient==='function')return}catch(e){last=e}}
@@ -19,12 +19,12 @@
   }
   try{
     await loadSupabase();
-    const response=await fetch('/sellb2.js?v=sellb2-11',{cache:'no-store'});
+    const response=await fetch('/sellb2.js?v=sellb2-12',{cache:'no-store'});
     if(!response.ok)throw new Error('Failed to load SELLB2 application ('+response.status+')');
     const source=await response.text();
     const expose='\nwindow.st=st;window.setPath=setPath;window.render=render;window.load=load;window.loadListings=load;window.toggleTheme=toggleTheme;window.drawer=drawer;window.save=save;';
     new Function(source+expose)();
     if(window.render&&document.getElementById('app')&&!document.getElementById('app').innerHTML.trim())await window.render();
-    loadScript('/location-data-v1.js?v=sellb2-11',6000).then(async()=>{if(window.estatenovaLocationReady)await window.estatenovaLocationReady;if(window.EN_LOCATION&&window.render)await window.render()}).catch(e=>console.warn('Optional location data failed:',e));
+    loadScript('/location-data-v1.js?v=sellb2-12',6000).then(async()=>{if(window.estatenovaLocationReady)await window.estatenovaLocationReady;if(window.EN_LOCATION&&window.render)await window.render()}).catch(e=>console.warn('Optional location data failed:',e));
   }catch(e){window.dispatchEvent(new CustomEvent('sellb2booterror',{detail:e}));}
 })();
