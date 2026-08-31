@@ -13,13 +13,13 @@
     document.head.appendChild(s);
   });
   try{
-    // Use the explicit UMD build. The package root is not guaranteed to expose
-    // the browser global when inserted as a classic script.
-    await loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js');
+    // Pin to a published Supabase UMD build; the package root is documented to
+    // expose the browser global, but the explicit UMD path is deterministic.
+    await loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4/dist/umd/supabase.js');
     if(!window.supabase||typeof window.supabase.createClient!=='function')throw new Error('Supabase browser SDK did not expose window.supabase');
-    await loadScript('/sellb2.js?v=sellb2-13');
+    await loadScript('/sellb2.js?v=sellb2-14');
     if(!document.getElementById('app').innerHTML.trim())throw new Error('SELLB2 application loaded but rendered no screen');
-    loadScript('/location-data-v1.js?v=sellb2-13',6000).then(async()=>{
+    loadScript('/location-data-v1.js?v=sellb2-14',6000).then(async()=>{
       if(window.estatenovaLocationReady)await window.estatenovaLocationReady;
       if(window.EN_LOCATION&&typeof window.render==='function')await window.render();
     }).catch(e=>console.warn('Optional location data failed:',e));
