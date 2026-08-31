@@ -1,0 +1,23 @@
+/* SELLB2 UI refinements */
+.homehero .location{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  width:max-content;
+  max-width:100%;
+  padding:10px 15px;
+  margin:-3px 0 24px;
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:14px;
+  background:rgba(255,255,255,.08);
+  line-height:1.2;
+  box-shadow:0 6px 18px rgba(0,0,0,.08);
+}
+.homehero .location span{
+  padding-left:10px;
+  border-left:1px solid rgba(255,255,255,.22);
+  opacity:.78;
+}
+@media(max-width:560px){
+  .homehero .location{padding:9px 13px;margin:-2px 0 21px}
+}
