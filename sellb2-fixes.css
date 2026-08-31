@@ -18,7 +18,6 @@
   border-left:1px solid rgba(255,255,255,.22);
   opacity:.78;
 }
-/* SELLB2 logo visibility fix: keep the existing logo markup and only make it render reliably. */
 .brandmark{
   display:block !important;
   position:relative;
@@ -58,9 +57,23 @@
   letter-spacing:-3px !important;
   text-align:center;
 }
+.seller-contact-box,.buyer-contact{
+  margin:18px 0;
+  padding:18px;
+  border:1px solid rgba(16,46,104,.14);
+  border-radius:16px;
+  background:rgba(16,46,104,.035);
+}
+.seller-contact-box h3,.buyer-contact h3{margin:0 0 7px}
+.seller-contact-box .formnote{margin:0 0 14px}
+.buyer-contact-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.buyer-contact-grid a{display:flex;flex-direction:column;gap:5px;padding:13px;border-radius:12px;background:rgba(255,255,255,.7);text-decoration:none;color:inherit;border:1px solid rgba(16,46,104,.1)}
+.buyer-contact-grid small{text-transform:uppercase;letter-spacing:.08em;opacity:.65;font-size:10px}
+.buyer-contact-grid b{overflow-wrap:anywhere}
 @media(max-width:560px){
   .homehero .location{padding:9px 13px;margin:-2px 0 21px}
   .brandmark{font-size:25px !important;width:140px;min-width:140px}
   .brand{width:140px;min-width:140px}
   .splashbrand{width:300px !important;min-width:300px !important;font-size:60px !important}
+  .buyer-contact-grid{grid-template-columns:1fr}
 }
