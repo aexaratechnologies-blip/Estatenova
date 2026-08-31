@@ -25,9 +25,12 @@ if(realCreate){
 }
 function loadExtra(){
   if(!document.body){setTimeout(loadExtra,100);return}
-  if(document.querySelector('script[data-sellb2-extra]'))return;
-  const a=document.createElement('script');a.src='/sellb2-enhancements.js?v=sellb2-23';a.dataset.sellb2Extra='1';document.body.appendChild(a);
-  const b=document.createElement('script');b.src='/sellb2-category-fix.js?v=sellb2-23';b.dataset.sellb2Extra='1';document.body.appendChild(b);
+  const existing=document.querySelectorAll('script[data-sellb2-extra]');
+  const wanted=['/sellb2-enhancements.js?v=sellb2-23','/sellb2-category-fix.js?v=sellb2-23','/sellb2-navigation-fix.js?v=sellb2-24'];
+  wanted.forEach(src=>{
+    if(Array.from(existing).some(s=>s.src&&s.src.indexOf(src.split('?')[0])>=0))return;
+    const a=document.createElement('script');a.src=src;a.dataset.sellb2Extra='1';document.body.appendChild(a);
+  });
 }
 setTimeout(loadExtra,900);
 })();
