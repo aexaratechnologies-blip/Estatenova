@@ -1,30 +1,30 @@
 'use strict';
 (async function(){
-  const loadScript=(src,timeout=9000)=>new Promise((resolve,reject)=>{
+  const loadScript=(src,timeout=12000)=>new Promise((resolve,reject)=>{
     const s=document.createElement('script');
-    let done=false;
-    const finish=(fn,arg)=>{if(done)return;done=true;clearTimeout(t);fn(arg)};
-    const t=setTimeout(()=>finish(reject,new Error('Timed out loading '+src)),timeout);
-    s.src=src;s.async=false;s.onload=()=>finish(resolve);s.onerror=()=>finish(reject,new Error('Failed to load '+src));
+    let settled=false;
+    const finish=(fn,arg)=>{if(settled)return;settled=true;clearTimeout(timer);fn(arg)};
+    const timer=setTimeout(()=>finish(reject,new Error('Timed out loading '+src)),timeout);
+    s.src=src;
+    s.async=false;
+    s.crossOrigin='anonymous';
+    s.onload=()=>finish(resolve);
+    s.onerror=()=>finish(reject,new Error('Failed to load '+src));
     document.head.appendChild(s);
   });
-  async function loadSupabase(){
-    const urls=[
-      'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
-      'https://unpkg.com/@supabase/supabase-js@2'
-    ];
-    let last;
-    for(const u of urls){try{await loadScript(u);if(window.supabase&&typeof window.supabase.createClient==='function')return}catch(e){last=e}}
-    throw last||new Error('Supabase client failed to initialize');
-  }
   try{
-    await loadSupabase();
-    const response=await fetch('/sellb2.js?v=sellb2-12',{cache:'no-store'});
-    if(!response.ok)throw new Error('Failed to load SELLB2 application ('+response.status+')');
-    const source=await response.text();
-    const expose='\nwindow.st=st;window.setPath=setPath;window.render=render;window.load=load;window.loadListings=load;window.toggleTheme=toggleTheme;window.drawer=drawer;window.save=save;';
-    new Function(source+expose)();
-    if(window.render&&document.getElementById('app')&&!document.getElementById('app').innerHTML.trim())await window.render();
-    loadScript('/location-data-v1.js?v=sellb2-12',6000).then(async()=>{if(window.estatenovaLocationReady)await window.estatenovaLocationReady;if(window.EN_LOCATION&&window.render)await window.render()}).catch(e=>console.warn('Optional location data failed:',e));
-  }catch(e){window.dispatchEvent(new CustomEvent('sellb2booterror',{detail:e}));}
+    // Use the explicit UMD build. The package root is not guaranteed to expose
+    // the browser global when inserted as a classic script.
+    await loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js');
+    if(!window.supabase||typeof window.supabase.createClient!=='function')throw new Error('Supabase browser SDK did not expose window.supabase');
+    await loadScript('/sellb2.js?v=sellb2-13');
+    if(!document.getElementById('app').innerHTML.trim())throw new Error('SELLB2 application loaded but rendered no screen');
+    loadScript('/location-data-v1.js?v=sellb2-13',6000).then(async()=>{
+      if(window.estatenovaLocationReady)await window.estatenovaLocationReady;
+      if(window.EN_LOCATION&&typeof window.render==='function')await window.render();
+    }).catch(e=>console.warn('Optional location data failed:',e));
+  }catch(e){
+    console.error('SELLB2 boot failed',e);
+    window.dispatchEvent(new CustomEvent('sellb2booterror',{detail:e}));
+  }
 })();
