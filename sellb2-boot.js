@@ -24,16 +24,17 @@
     }
 
     // Load the existing application as text and execute it in an isolated
-    // function scope. This prevents duplicate top-level lexical declarations.
-    const response=await fetch('/sellb2.js?v=sellb2-7',{cache:'no-store'});
+    // function scope. The application still uses inline onclick/oninput
+    // handlers, so explicitly expose the handlers/state they need.
+    const response=await fetch('/sellb2.js?v=sellb2-8',{cache:'no-store'});
     if(!response.ok) throw new Error('Failed to load SELLB2 application ('+response.status+')');
     const source=await response.text();
-    const expose='\nwindow.setPath=setPath;\nwindow.render=render;\nwindow.loadListings=load;\n';
+    const expose='\nwindow.st=st;\nwindow.setPath=setPath;\nwindow.render=render;\nwindow.load=load;\nwindow.loadListings=load;\nwindow.toggleTheme=toggleTheme;\nwindow.drawer=drawer;\nwindow.save=save;\n';
     new Function(source+expose)();
 
     // Location data is optional for startup and can populate filters later.
     try{
-      await loadScript('/location-data-v1.js?v=sellb2-7');
+      await loadScript('/location-data-v1.js?v=sellb2-8');
       if(window.estatenovaLocationReady) await window.estatenovaLocationReady;
       if(window.EN_LOCATION && typeof window.render==='function') await window.render();
     }catch(e){ console.warn('Optional location data failed:',e); }
