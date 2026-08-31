@@ -1,0 +1,37 @@
+/* SELLB2 text-only wordmark. This intentionally replaces image-based branding only. */
+.brandmark,
+.splashbrand {
+  width: 220px !important;
+  height: 52px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: none !important;
+  background-image: none !important;
+  position: relative !important;
+}
+.brandmark::after,
+.splashbrand::after {
+  content: "SELLB2";
+  display: block;
+  white-space: nowrap;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 42px;
+  line-height: 1;
+  font-weight: 850;
+  letter-spacing: -2.5px;
+  color: #fff;
+}
+.brandmark::after,
+.splashbrand::after {
+  background: linear-gradient(110deg, #fff 0 66%, #8b7cff 72%, #4f7cff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+@media (max-width: 520px) {
+  .brandmark,
+  .splashbrand { width: 190px !important; height: 46px !important; }
+  .brandmark::after,
+  .splashbrand::after { font-size: 35px; letter-spacing: -2px; }
+}
