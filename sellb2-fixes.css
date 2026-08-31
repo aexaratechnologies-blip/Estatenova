@@ -18,6 +18,49 @@
   border-left:1px solid rgba(255,255,255,.22);
   opacity:.78;
 }
+/* SELLB2 logo visibility fix: keep the existing logo markup and only make it render reliably. */
+.brandmark{
+  display:block !important;
+  position:relative;
+  width:150px;
+  min-width:150px;
+  height:44px;
+  line-height:44px;
+  font-size:28px !important;
+  font-weight:900 !important;
+  letter-spacing:-1.5px;
+  color:#fff !important;
+  white-space:nowrap;
+  visibility:visible !important;
+  opacity:1 !important;
+  overflow:visible !important;
+}
+.brandmark span{
+  color:#7b6af2 !important;
+  visibility:visible !important;
+  opacity:1 !important;
+}
+.brand{
+  display:flex !important;
+  align-items:center;
+  justify-content:flex-start;
+  min-width:150px;
+  width:150px;
+  visibility:visible !important;
+  opacity:1 !important;
+}
+.splashbrand{
+  width:300px !important;
+  min-width:300px !important;
+  height:82px !important;
+  line-height:82px !important;
+  font-size:64px !important;
+  letter-spacing:-3px !important;
+  text-align:center;
+}
 @media(max-width:560px){
   .homehero .location{padding:9px 13px;margin:-2px 0 21px}
+  .brandmark{font-size:25px !important;width:140px;min-width:140px}
+  .brand{width:140px;min-width:140px}
+  .splashbrand{width:300px !important;min-width:300px !important;font-size:60px !important}
 }
