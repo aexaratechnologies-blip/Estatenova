@@ -12,12 +12,25 @@
   function back(){if(history.length>1){history.back();return}go('/')}
   function pathFromText(text){const t=String(text||'').toLowerCase();if(t.includes('home'))return '/';if(t.includes('propert'))return '/properties';if(t.includes('vehicle'))return '/vehicles';if(t.includes('business'))return '/businesses';if(t.includes('saved'))return '/saved';if(t.includes('message')||t.includes('chat'))return '/messages';if(t.includes('profile')||t.includes('account'))return '/profile';return null}
   function toast(message){if(typeof window.toast==='function')window.toast(message);else alert(message)}
+  function applySearchFilters(){
+    const s=window.st;
+    const path=s.cat==='vehicle'?'/vehicles':s.cat==='business'?'/businesses':'/properties';
+    s.type=s.type||'all';
+    s.route=path;
+    history.pushState({},'',path);
+    Promise.resolve(window.render()).then(()=>window.load());
+  }
   function install(){
     if(window.__sellb2FinalFixInstalled)return;
     window.__sellb2FinalFixInstalled=true;
     window.setPath=go;window.__sellb2Navigate=go;
+    // Capture the Search & Filters submit action before the generated inline
+    // handler. This makes the button reliable even if another navigation layer
+    // is installed later.
     document.addEventListener('click',function(ev){
       const el=ev.target;if(!el?.closest)return;
+      const filterBtn=el.closest('.filterbox button.btn.primary.full');
+      if(filterBtn){ev.preventDefault();ev.stopImmediatePropagation();applySearchFilters();return}
       const backEl=el.closest('.pagehead .back,.back,[data-back],button[aria-label*="back" i],button[title*="back" i]');
       if(backEl){ev.preventDefault();ev.stopImmediatePropagation();back();return}
       const nav=el.closest('.bottomnav button,.bottomnav a,.bottom-nav button,.bottom-nav a');
@@ -40,8 +53,6 @@
       if(e)e.preventDefault();if(!window.st.user){go('/auth');return}
       const input=document.getElementById('msg'),body=input?.value?.trim()||'';if(!body)return;
       try{
-        // Supabase already has a SECURITY DEFINER send_message RPC which validates
-        // conversation membership and updates last_message/last_message_at.
         const r=await window.db.rpc('send_message',{p_conversation_id:id,p_body:body});
         if(r.error)throw r.error;
         if(input)input.value='';
