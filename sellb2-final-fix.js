@@ -12,6 +12,43 @@
   function back(){if(history.length>1){history.back();return}go('/')}
   function pathFromText(text){const t=String(text||'').toLowerCase();if(t.includes('home'))return '/';if(t.includes('propert'))return '/properties';if(t.includes('vehicle'))return '/vehicles';if(t.includes('business'))return '/businesses';if(t.includes('saved'))return '/saved';if(t.includes('message')||t.includes('chat'))return '/messages';if(t.includes('profile')||t.includes('account'))return '/profile';return null}
   function toast(message){if(typeof window.toast==='function')window.toast(message);else alert(message)}
+  function legalPage(kind){
+    const privacy=kind==='privacy';
+    const title=privacy?'Privacy Policy':'Terms & Conditions';
+    const body=privacy?`
+      <section class="legalbox"><p><b>Last updated: 4 September 2026</b></p><p>SELLB2 is a marketplace operated by <b>Aexara Technologies Private Limited</b>. This Privacy Policy explains how we collect, use and protect information when you use SELLB2.</p><h3>1. Information we collect</h3><p>We may collect account information such as your name, email address and phone number, profile information, listing information, images and messages you choose to provide.</p><h3>2. How we use information</h3><p>We use information to create and secure accounts, operate the marketplace, publish and manage listings, enable buyer-seller communication, provide support and improve SELLB2.</p><h3>3. Public marketplace information</h3><p>Information you include in a listing may be visible to other users. Do not publish passwords, payment credentials, government identification numbers or other sensitive information in a listing or message.</p><h3>4. Storage and security</h3><p>SELLB2 uses third-party infrastructure providers, including Supabase, to store and process application data. We apply access controls intended to protect account and marketplace data, but no internet service can guarantee absolute security.</p><h3>5. Communications</h3><p>We do not send promotional messages unless a feature explicitly requires them or you request them. Transactional or account-related communications may be sent where necessary to provide a requested service.</p><h3>6. Your choices</h3><p>You may update profile information through your account. You can contact Aexara Technologies Private Limited regarding privacy questions or requests concerning your information.</p><h3>7. Children</h3><p>SELLB2 is not intended for children who are not legally permitted to use online marketplace services in their jurisdiction.</p><h3>8. Changes</h3><p>We may update this policy when the service or applicable requirements change. The latest version will be available inside SELLB2.</p></section>`:`
+      <section class="legalbox"><p><b>Last updated: 4 September 2026</b></p><p>These Terms & Conditions govern your use of SELLB2, a marketplace operated by <b>Aexara Technologies Private Limited</b>.</p><h3>1. Marketplace role</h3><p>SELLB2 provides a platform for users to discover and publish listings for properties, vehicles and businesses. SELLB2 is not automatically a party to transactions between buyers and sellers.</p><h3>2. User accounts</h3><p>You are responsible for maintaining the security of your account and for the accuracy of information you submit. Do not create accounts using another person's identity or provide misleading information.</p><h3>3. Listings</h3><p>You must have the right to advertise anything you list. Listings must be accurate, lawful and not misleading. You must not upload illegal, fraudulent, infringing, abusive or deceptive content.</p><h3>4. Transactions</h3><p>Users are responsible for independently verifying ownership, condition, documentation, pricing and other transaction details. Never transfer money solely because a listing appears on SELLB2.</p><h3>5. Prohibited conduct</h3><p>You must not attempt to compromise the service, scrape it abusively, impersonate others, upload malware, manipulate listings, harass users or use SELLB2 for unlawful activity.</p><h3>6. Content and removal</h3><p>You retain responsibility for content you submit. Aexara Technologies Private Limited may restrict or remove content or accounts that violate these terms, applicable law or platform safety requirements.</p><h3>7. Availability</h3><p>SELLB2 is provided on an ongoing basis, but availability and features may change. No guarantee is made that every listing, message or service will always be available or error-free.</p><h3>8. Limitation</h3><p>To the extent permitted by applicable law, Aexara Technologies Private Limited is not responsible for losses arising from transactions or representations made by individual marketplace users.</p><h3>9. Changes</h3><p>These terms may be updated as SELLB2 evolves. Continued use after an update means you accept the updated terms to the extent permitted by law.</p></section>`;
+    return `<main class="screen">${head(title,'/profile')}<div class="legalcontent">${body}<button class="btn primary full" onclick="setPath('/profile')">Back to Profile</button><p class="powered">Powered by <b>Aexara Technologies Private Limited</b></p></div>${nav('/profile')}</main>`;
+  }
+  function installLegal(){
+    if(window.__sellb2LegalInstalled)return;
+    window.__sellb2LegalInstalled=true;
+    const style=document.createElement('style');
+    style.textContent=`.legalcontent{padding:0 18px 28px}.legalbox{padding:20px;border:1px solid var(--line);background:var(--surface);border-radius:22px;box-shadow:var(--shadow);font-size:14px;line-height:1.65}.legalbox h3{font-size:16px;margin:20px 0 6px}.legalbox p{color:var(--muted);margin:8px 0}.legalbox b{color:var(--text)}.powered{text-align:center;color:var(--muted);font-size:12px;padding:18px 0 8px}.profilelegal{margin:18px;border:1px solid var(--line);border-radius:20px;overflow:hidden;background:var(--surface)}.profilelegal button{width:100%;padding:16px 17px;border:0;border-bottom:1px solid var(--line);background:none;text-align:left;display:flex;justify-content:space-between;font-weight:750}.profilelegal button:last-child{border-bottom:0}.profilelegal small{display:block;padding:12px 17px;color:var(--muted);border-bottom:1px solid var(--line);font-size:11px}.profilepowered{text-align:center;color:var(--muted);font-size:11px;padding:2px 18px 22px}.profilepowered b{color:var(--text)}`;
+    document.head.appendChild(style);
+    const originalRender=window.render;
+    if(typeof originalRender==='function'){
+      window.render=async function(){
+        const r=await originalRender.apply(this,arguments);
+        if(location.pathname==='/privacy-policy')return document.getElementById('app').innerHTML=legalPage('privacy');
+        if(location.pathname==='/terms-and-conditions')return document.getElementById('app').innerHTML=legalPage('terms');
+        setTimeout(addProfileLegal,0);
+        return r;
+      };
+    }
+    function addProfileLegal(){
+      if(location.pathname!=='/profile')return;
+      const menu=document.querySelector('.profilemenu');
+      if(!menu||menu.querySelector('.profile-legal-marker'))return;
+      const box=document.createElement('section');box.className='profilelegal profile-legal-marker';
+      box.innerHTML='<small>LEGAL &amp; INFORMATION</small><button type="button" data-legal="privacy">Privacy Policy <b>›</b></button><button type="button" data-legal="terms">Terms &amp; Conditions <b>›</b></button>';
+      menu.parentNode.insertBefore(box,menu.nextSibling);
+      const p=document.createElement('p');p.className='profilepowered';p.innerHTML='Powered by <b>Aexara Technologies Private Limited</b>';
+      box.parentNode.insertBefore(p,box.nextSibling);
+      box.addEventListener('click',e=>{const b=e.target.closest('[data-legal]');if(!b)return;go(b.dataset.legal==='privacy'?'/privacy-policy':'/terms-and-conditions')});
+    }
+    setInterval(addProfileLegal,500);
+  }
   function applySearchFilters(){
     const s=window.st;
     const path=s.cat==='vehicle'?'/vehicles':s.cat==='business'?'/businesses':'/properties';
@@ -23,10 +60,8 @@
   function install(){
     if(window.__sellb2FinalFixInstalled)return;
     window.__sellb2FinalFixInstalled=true;
+    installLegal();
     window.setPath=go;window.__sellb2Navigate=go;
-    // Capture the Search & Filters submit action before the generated inline
-    // handler. This makes the button reliable even if another navigation layer
-    // is installed later.
     document.addEventListener('click',function(ev){
       const el=ev.target;if(!el?.closest)return;
       const filterBtn=el.closest('.filterbox button.btn.primary.full');
