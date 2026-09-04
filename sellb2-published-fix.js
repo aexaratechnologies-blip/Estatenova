@@ -1,5 +1,7 @@
 (function(){
   'use strict';
+  function esc(v){return String(v??'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+  function money(n){return !n?'Price on request':'₹'+(n>=1e7?(n/1e7).toFixed(2)+' Cr':n>=1e5?(n/1e5).toFixed(2)+' L':Number(n).toLocaleString('en-IN'))}
   function ready(fn){
     if(window.st&&window.db&&typeof window.render==='function'&&typeof window.publish==='function') return fn();
     setTimeout(function(){ready(fn)},100);
@@ -11,10 +13,7 @@
     window.publish=async function(e){
       var before=window.st.route;
       await originalPublish(e);
-      if(before==='/post' && window.st.route!=='/post'){
-        window.st.lastPublishedId=window.st.route;
-        window.setPath('/my-listings');
-      }
+      if(before==='/post' && window.st.route!=='/post') window.setPath('/my-listings');
     };
 
     window.myListingsPage=async function(){
@@ -33,8 +32,8 @@
         var status=published?'Published':pending?'Pending approval':(p.status||'Draft');
         var image=p.cover_image_url||(p.image_urls&&p.image_urls[0]);
         return `<article class="my-listing-card">
-          <div class="my-listing-media">${image?`<img src="${window.esc(image)}" alt="">`:'<div class="noimage"><span>⌂</span></div>'}</div>
-          <div class="my-listing-info"><span class="my-listing-status ${published?'published':''}">${status}</span><h3>${window.esc(p.title||'Untitled listing')}</h3><strong>${window.money(p.price)}</strong><p>${window.esc([p.locality,p.city,p.district,p.state].filter(Boolean).slice(0,3).join(', '))}</p><div class="my-listing-actions"><button class="btn ghost" onclick="setPath('/listing/${p.id}')">View listing</button><button class="btn ${published?'published-btn':'ghost'}" ${published?'disabled':''}>${published?'Published':status}</button></div></div>
+          <div class="my-listing-media">${image?`<img src="${esc(image)}" alt="">`:'<div class="noimage"><span>⌂</span></div>'}</div>
+          <div class="my-listing-info"><span class="my-listing-status ${published?'published':''}">${status}</span><h3>${esc(p.title||'Untitled listing')}</h3><strong>${money(p.price)}</strong><p>${esc([p.locality,p.city,p.district,p.state].filter(Boolean).slice(0,3).join(', '))}</p><div class="my-listing-actions"><button class="btn ghost" onclick="setPath('/listing/${p.id}')">View listing</button><button class="btn ${published?'published-btn':'ghost'}" ${published?'disabled':''}>${published?'Published':status}</button></div></div>
         </article>`;
       }).join('')}</div>`:window.empty('No listings yet','Your published listings will appear here.','/post','Publish a listing');
       return `<main class="screen">${window.head('My Listings','/profile')}<div class="content">${body}</div>${window.nav('/profile')}</main>`;
