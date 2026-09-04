@@ -1,9 +1,12 @@
-/* EstateNova India location data v1 */
+/* EstateNova India location data v2 */
 'use strict';
 
 const EN_LOCATION_DISTRICTS_URL='https://raw.githubusercontent.com/KTBsomen/Indian-state-district-json/main/india-states-districts-latest.json';
 const EN_LOCATION_CITIES_URL='https://raw.githubusercontent.com/nshntarora/Indian-Cities-JSON/master/cities.json';
 const EN_LOCATION_FALLBACK_STATES=['Andhra Pradesh','Arunachal Pradesh','Assam','Bihar','Chhattisgarh','Goa','Gujarat','Haryana','Himachal Pradesh','Jharkhand','Karnataka','Kerala','Madhya Pradesh','Maharashtra','Manipur','Meghalaya','Mizoram','Nagaland','Odisha','Punjab','Rajasthan','Sikkim','Tamil Nadu','Telangana','Tripura','Uttar Pradesh','Uttarakhand','West Bengal','Andaman and Nicobar Islands','Chandigarh','Dadra and Nagar Haveli and Daman and Diu','Delhi','Jammu and Kashmir','Ladakh','Lakshadweep','Puducherry'];
+
+/* Create this object synchronously so sellb2.js keeps the same reference while data loads. */
+window.EN_LOCATION={states:[...EN_LOCATION_FALLBACK_STATES],districtsByState:{},citiesByState:{},ready:false};
 
 function enLocationWithTimeout(url,ms=7000){
   return Promise.race([
@@ -20,8 +23,9 @@ window.estatenovaLocationReady=(async function(){
   const districtsByState={};
   (Array.isArray(districtRows)?districtRows:[]).forEach(row=>{
     const state=String(row?.state||'').trim();
-    if(state)districtsByState[state]=[...new Set((row.districts||[]).map(x=>String(x).trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'en',{sensitivity:'base'}));
+    if(state)districtsByState[state]=[...new Set((Array.isArray(row.districts)?row.districts:[]).map(x=>String(x).trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'en',{sensitivity:'base'}));
   });
+
   const citiesByState={};
   (Array.isArray(cityRows)?cityRows:[]).forEach(row=>{
     const state=String(row?.state||'').trim(),city=String(row?.name||'').trim();
@@ -29,7 +33,10 @@ window.estatenovaLocationReady=(async function(){
   });
   Object.keys(citiesByState).forEach(s=>citiesByState[s]=[...new Set(citiesByState[s])].sort((a,b)=>a.localeCompare(b,'en',{sensitivity:'base'})));
 
-  const states=[...new Set([...EN_LOCATION_FALLBACK_STATES,...Object.keys(districtsByState),...Object.keys(citiesByState)])].sort((a,b)=>a.localeCompare(b,'en',{sensitivity:'base'}));
-  window.EN_LOCATION={states,districtsByState,citiesByState};
+  /* Mutate the original object instead of replacing it. */
+  window.EN_LOCATION.states=[...new Set([...EN_LOCATION_FALLBACK_STATES,...Object.keys(districtsByState),...Object.keys(citiesByState)])].sort((a,b)=>a.localeCompare(b,'en',{sensitivity:'base'}));
+  window.EN_LOCATION.districtsByState=districtsByState;
+  window.EN_LOCATION.citiesByState=citiesByState;
+  window.EN_LOCATION.ready=true;
   return window.EN_LOCATION;
 })();
