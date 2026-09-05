@@ -5,14 +5,10 @@
     const r=await fetch('/sellb2.js?v=sellb2-runtime-10',{cache:'no-store'});
     if(!r.ok) throw new Error('Marketplace client script HTTP '+r.status);
     let code=await r.text();
-    // Expose the application state/database to the navigation layer. The original
-    // top-level const bindings were private to the dynamically injected script.
     code=code.replace(/\bconst\s+db\s*=/,'var db=');
     code=code.replace(/\bconst\s+st\s*=/,'var st=');
     code=code.replace(/\bfunction\s+top\s*\(/g,'function appTop(');
     code=code.replace(/\btop\(\)/g,'appTop()');
-    // Keep the explicit "Everything" category instead of listingPage() forcing
-    // /properties back to the property-only category during render.
     code=code.replace('function listingPage(cat){let types=cat===\'property\'?P:cat===\'vehicle\'?V:B;st.cat=cat;return', 'function listingPage(cat){let types=cat===\'property\'?P:cat===\'vehicle\'?V:B;if(st.cat!==\'all\')st.cat=cat;return');
     code=code.replace("category:c,price:+lp.value||0,","category:c,listing_type:'sale',price:+lp.value||0,");
     code=code.replace("if(st.wheels)q=q.contains('details',{wheels:+st.wheels});if(st.registered)","if(st.wheels)q=q.contains('details',{wheels:+st.wheels});if(st.year&&st.cat==='business')q=q.contains('details',{established_year:+st.year});if(st.registered)");
@@ -25,6 +21,10 @@
     script.text=code;
     script.dataset.sellb2Runtime='10';
     document.body.appendChild(script);
+    const browse=document.createElement('script');
+    browse.src='/sellb2-browse-fix.js?v=sellb2-browse-1';
+    browse.async=false;
+    document.body.appendChild(browse);
   } catch(e) {
     console.error('SELLB2 runtime loader:',e);
     if(m) m.innerHTML='SELLB2 application failed to start: '+String(e.message||e).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]});
