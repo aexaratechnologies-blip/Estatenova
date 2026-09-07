@@ -135,7 +135,10 @@ function renderCardGalleries(){
     const arr=getUrls(p);
     if(!arr.length)return;
     if(arr.length>1){
-      if(box.querySelector(':scope > .noimage'))clearMedia(box);
+      const existing=box.querySelector(':scope > .s2-gallery');
+      const oldUrls=existing?(existing.dataset.urls||'').split('|').filter(Boolean):[];
+      if(existing&&oldUrls.length===arr.length&&oldUrls.every((x,i)=>x===arr[i]))return;
+      clearMedia(box);
       gallery(box,arr);
       return;
     }
@@ -163,6 +166,10 @@ async function renderDetailGallery(){
     arr=[...new Set([...arr,...rel])];
   }
   if(!arr.length)return;
+  const existing=box.querySelector(':scope > .s2-gallery');
+  const oldUrls=existing?(existing.dataset.urls||'').split('|').filter(Boolean):[];
+  if(existing&&oldUrls.length===arr.length&&oldUrls.every((x,i)=>x===arr[i]))return;
+  clearMedia(box);
   gallery(box,arr);
 }
 
