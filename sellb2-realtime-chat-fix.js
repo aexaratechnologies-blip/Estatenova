@@ -8,11 +8,11 @@
   function removeChannel(ch){if(ch&&window.db){try{window.db.removeChannel(ch)}catch(e){}}}
   function cleanup(){removeChannel(activeChannel);activeChannel=null;activeConversation=null;removeChannel(listChannel);listChannel=null;}
 
-  function istTime(value,withSeconds){
+  function istTime(value){
     if(!value)return '';
     var d=new Date(value);
     if(isNaN(d.getTime()))return '';
-    return new Intl.DateTimeFormat('en-IN',{timeZone:'Asia/Kolkata',hour:'2-digit',minute:'2-digit',second:withSeconds?'2-digit':undefined,hour12:true}).format(d);
+    return new Intl.DateTimeFormat('en-IN',{timeZone:'Asia/Kolkata',hour:'2-digit',minute:'2-digit',hour12:true}).format(d);
   }
 
   function tagExisting(){
@@ -22,9 +22,8 @@
     var nodes=box.querySelectorAll('.bubble');
     for(var i=0;i<nodes.length&&i<arr.length;i++){
       nodes[i].dataset.messageId=String(arr[i].id||'');
-      if(!nodes[i].querySelector('.msg-time')&&arr[i].created_at){
-        var t=document.createElement('span');t.className='msg-time';t.textContent=istTime(arr[i].created_at,false);nodes[i].appendChild(t);
-      }
+      var oldTime=nodes[i].querySelector('.msg-time');
+      if(oldTime)oldTime.remove();
     }
   }
 
@@ -44,7 +43,6 @@
     el.className='bubble '+(mine?'mine':'theirs');
     el.dataset.messageId=String(m.id);
     el.textContent=m.body||'';
-    if(m.created_at){var t=document.createElement('span');t.className='msg-time';t.textContent=istTime(m.created_at,false);el.appendChild(t);}
     box.appendChild(el);
     box.scrollTop=box.scrollHeight;
   }
@@ -61,7 +59,7 @@
         var small=rows[i].querySelector('small');
         var time=rows[i].querySelector('time');
         if(small)small.textContent=(payload.new.body||'Conversation');
-        if(time)time.textContent=istTime(payload.new.created_at,false);
+        if(time)time.textContent=istTime(payload.new.created_at);
         break;
       }
     }
@@ -74,7 +72,7 @@
       var rows=document.querySelectorAll('.conversation'),convs=window.st.convs||[];
       for(var i=0;i<rows.length;i++){
         var oc=rows[i].getAttribute('onclick')||'';
-        for(var j=0;j<convs.length;j++)if(convs[j].id&&oc.indexOf(String(convs[j].id))!==-1){var tm=rows[i].querySelector('time');if(tm)tm.textContent=istTime(convs[j].last_message_at,false);break;}
+        for(var j=0;j<convs.length;j++)if(convs[j].id&&oc.indexOf(String(convs[j].id))!==-1){var tm=rows[i].querySelector('time');if(tm)tm.textContent=istTime(convs[j].last_message_at);break;}
       }
     }else if(location.pathname.indexOf('/messages/')===0)tagExisting();
   }
