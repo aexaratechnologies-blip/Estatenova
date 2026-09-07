@@ -4,6 +4,9 @@
   var activeConversation=null;
   var listChannel=null;
   var originalSetPath=null;
+  var originalSendMsg=null;
+  var lastSendKey='';
+  var lastSendAt=0;
 
   function removeChannel(ch){if(ch&&window.db){try{window.db.removeChannel(ch)}catch(e){}}}
   function cleanup(){removeChannel(activeChannel);activeChannel=null;activeConversation=null;removeChannel(listChannel);listChannel=null;}
@@ -93,8 +96,35 @@
       .subscribe(function(status,err){if((status==='CHANNEL_ERROR'||status==='TIMED_OUT')&&err)console.error('SELLB2 message-list realtime:',status,err)});
   }
 
+  function installSendGuard(){
+    if(window.__sellb2SendGuardInstalled)return;
+    if(typeof window.sendMsg!=='function'){setTimeout(installSendGuard,100);return;}
+    originalSendMsg=window.sendMsg;
+    window.sendMsg=async function(e,id){
+      if(e&&e.preventDefault)e.preventDefault();
+      var input=document.getElementById('msg');
+      var body=input?String(input.value||'').trim():'';
+      if(!body)return;
+      var key=String(id)+'|'+body;
+      var now=Date.now();
+      if(window.__sellb2SendingMessage)return;
+      if(key===lastSendKey&&now-lastSendAt<1500)return;
+      window.__sellb2SendingMessage=true;
+      lastSendKey=key;
+      lastSendAt=now;
+      var btn=input&&input.form?input.form.querySelector('button'):null;
+      if(btn)btn.disabled=true;
+      try{return await originalSendMsg.apply(this,arguments)}
+      finally{
+        setTimeout(function(){window.__sellb2SendingMessage=false;if(btn)btn.disabled=false},400);
+      }
+    };
+    window.__sellb2SendGuardInstalled=true;
+  }
+
   function sync(){
     if(!window.db||!window.st)return;
+    installSendGuard();
     if(!window.st.user){cleanup();return;}
     var p=location.pathname||'/';
     if(p.indexOf('/messages/')===0){tagExisting();subscribeChat(p.split('/')[2]);removeChannel(listChannel);listChannel=null;}
