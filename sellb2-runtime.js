@@ -2,13 +2,14 @@
   'use strict';
   const m=document.getElementById('bootmsg');
   try {
-    const r=await fetch('/sellb2.js?v=sellb2-runtime-11',{cache:'no-store'});
+    const r=await fetch('/sellb2.js?v=sellb2-runtime-12',{cache:'no-store'});
     if(!r.ok) throw new Error('Marketplace client script HTTP '+r.status);
     let code=await r.text();
     code=code.replace(/\bconst\s+db\s*=/,'window.db=');
     code=code.replace(/\bconst\s+st\s*=/,'window.st=');
     code=code.replace(/\bfunction\s+top\s*\(/g,'function appTop(');
     code=code.replace(/\btop\(\)/g,'appTop()');
+    code=code.replace('function setPath(p){history.pushState({},\'\',p);st.route=p;render();}','function setPath(p){history.pushState({},\'\',p);st.route=p;render();}window.setPath=setPath;');
     code=code.replace('function listingPage(cat){let types=cat===\'property\'?P:cat===\'vehicle\'?V:B;st.cat=cat;return', 'function listingPage(cat){let types=cat===\'property\'?P:cat===\'vehicle\'?V:B;if(st.cat!==\'all\')st.cat=cat;return');
     code=code.replace("category:c,price:+lp.value||0,","category:c,listing_type:'sale',price:+lp.value||0,");
     code=code.replace("if(st.wheels)q=q.contains('details',{wheels:+st.wheels});if(st.registered)","if(st.wheels)q=q.contains('details',{wheels:+st.wheels});if(st.year&&st.cat==='business')q=q.contains('details',{established_year:+st.year});if(st.registered)");
@@ -19,7 +20,7 @@
     const script=document.createElement('script');
     script.type='text/javascript';
     script.text=code;
-    script.dataset.sellb2Runtime='11';
+    script.dataset.sellb2Runtime='12';
     document.body.appendChild(script);
     const browse=document.createElement('script');
     browse.src='/sellb2-browse-fix.js?v=sellb2-browse-1';
