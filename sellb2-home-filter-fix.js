@@ -1,4 +1,4 @@
-/* SELLB2 filter navigation: bypass SPA event conflicts with a real browser navigation. */
+/* SELLB2 filter navigation: keep SPA navigation and bypass conflicting handlers. */
 (function(){
   'use strict';
   let navigating = false;
@@ -10,11 +10,19 @@
   function openFilters(){
     if(navigating) return;
     navigating = true;
-    window.location.assign('/filters');
+    if(typeof window.setPath === 'function'){
+      window.setPath('/filters');
+    }else{
+      history.pushState({},'', '/filters');
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    }
+    setTimeout(function(){ navigating = false; }, 500);
   }
 
   document.addEventListener('pointerdown', function(e){
     if(!isFilterButton(e.target)) return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
     openFilters();
   }, true);
 
@@ -22,6 +30,5 @@
     if(!isFilterButton(e.target)) return;
     e.preventDefault();
     e.stopImmediatePropagation();
-    openFilters();
   }, true);
 })();
