@@ -1,0 +1,17 @@
+/* SELLB2: make the home filter control physically clickable on touch and mouse. */
+.homehero .searchbar{
+  position:relative!important;
+  z-index:10!important;
+}
+.homehero .searchbar button{
+  position:relative!important;
+  z-index:30!important;
+  flex:0 0 46px!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+  cursor:pointer!important;
+}
+.homehero .searchbar input{
+  position:relative!important;
+  z-index:1!important;
+}
