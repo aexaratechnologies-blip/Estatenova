@@ -5,8 +5,8 @@
     <application
         android:allowBackup="false"
         android:label="SELLB2"
-        android:icon="@drawable/ic_launcher"
-        android:roundIcon="@drawable/ic_launcher"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher"
         android:usesCleartextTraffic="false"
         android:theme="@style/Theme.SELLB2"
         android:supportsRtl="true">
