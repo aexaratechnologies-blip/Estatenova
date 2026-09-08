@@ -32,9 +32,16 @@ jobs:
         working-directory: android
         run: gradle --no-daemon assembleDebug
 
-      - name: Build release APK
+      - name: Build release APK and AAB
         working-directory: android
-        run: gradle --no-daemon assembleRelease
+        run: gradle --no-daemon assembleRelease bundleRelease
+
+      - name: Report package sizes
+        working-directory: android
+        run: |
+          ls -lh app/build/outputs/apk/debug/app-debug.apk
+          ls -lh app/build/outputs/apk/release/app-release-unsigned.apk
+          ls -lh app/build/outputs/bundle/release/app-release.aab
 
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
@@ -49,5 +56,13 @@ jobs:
         with:
           name: SELLB2-release-apk
           path: android/app/build/outputs/apk/release/app-release-unsigned.apk
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload release AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: SELLB2-release-aab
+          path: android/app/build/outputs/bundle/release/app-release.aab
           if-no-files-found: error
           retention-days: 14
