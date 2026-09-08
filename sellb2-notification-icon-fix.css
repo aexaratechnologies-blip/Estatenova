@@ -1,0 +1,1 @@
+.notificationBell{font-size:0!important;transform:none!important;width:22px;height:22px;display:block;margin:auto}.notificationBell::before{content:'🔔';font-size:20px;line-height:22px}.notificationMini{display:inline-flex!important;align-items:center;justify-content:center}
