@@ -16,20 +16,27 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 
 public class MainActivity extends Activity {
     private static final int FILE_CHOOSER_REQUEST = 4101;
     private static final String HOME_URL = "https://estatenova-ten.vercel.app/";
     private WebView webView;
     private ValueCallback<Uri[]> fileChooserCallback;
+    private ImageView splash;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         configureSystemBars();
 
+        FrameLayout root = new FrameLayout(this);
+        root.setBackgroundColor(Color.rgb(7, 11, 22));
+
         webView = new WebView(this);
-        webView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        webView.setLayoutParams(new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         webView.setBackgroundColor(Color.rgb(7, 13, 27));
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setDomStorageEnabled(true);
@@ -38,7 +45,9 @@ public class MainActivity extends Activity {
         webView.getSettings().setAllowContentAccess(true);
         webView.getSettings().setMediaPlaybackRequiresUserGesture(true);
         webView.getSettings().setSupportMultipleWindows(false);
-        webView.getSettings().setUserAgentString(webView.getSettings().getUserAgentString() + " SELLB2-Android/1.1");
+        webView.getSettings().setBuiltInZoomControls(false);
+        webView.getSettings().setDisplayZoomControls(false);
+        webView.getSettings().setUserAgentString(webView.getSettings().getUserAgentString() + " SELLB2-Android/1.2");
         CookieManager.getInstance().setAcceptCookie(true);
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
 
@@ -65,6 +74,12 @@ public class MainActivity extends Activity {
                 } catch (Exception ignored) { }
                 return true;
             }
+
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+                hideSplash();
+            }
         });
 
         webView.setWebChromeClient(new WebChromeClient() {
@@ -88,16 +103,38 @@ public class MainActivity extends Activity {
             }
         });
 
-        setContentView(webView);
+        root.addView(webView);
+
+        // Exact SELLB2 artwork supplied for the app's startup branding.
+        splash = new ImageView(this);
+        splash.setImageResource(com.aexara.sellb2.R.drawable.sellb2_logo);
+        splash.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        splash.setBackgroundColor(Color.rgb(7, 11, 22));
+        splash.setPadding(28, 28, 28, 28);
+        splash.setLayoutParams(new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        root.addView(splash);
+
+        setContentView(root);
         webView.requestApplyInsets();
         if (savedInstanceState == null) webView.loadUrl(HOME_URL);
-        else webView.restoreState(savedInstanceState);
+        else {
+            webView.restoreState(savedInstanceState);
+            hideSplash();
+        }
+    }
+
+    private void hideSplash() {
+        if (splash == null) return;
+        splash.animate().alpha(0f).setDuration(180).withEndAction(() -> {
+            if (splash != null) splash.setVisibility(ImageView.GONE);
+        }).start();
     }
 
     private void configureSystemBars() {
         Window window = getWindow();
-        window.setStatusBarColor(Color.rgb(7, 13, 27));
-        window.setNavigationBarColor(Color.rgb(7, 13, 27));
+        window.setStatusBarColor(Color.rgb(7, 11, 22));
+        window.setNavigationBarColor(Color.rgb(7, 11, 22));
         if (Build.VERSION.SDK_INT >= 29) {
             window.setNavigationBarContrastEnforced(false);
             window.setStatusBarContrastEnforced(false);
