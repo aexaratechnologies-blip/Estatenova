@@ -1,4 +1,4 @@
-/* SELLB2 home search/filter repair v9 — filter opens as a clean route load so it cannot lock the current SPA. */
+/* SELLB2 home search/filter repair v10 — filter opens inside the SPA without a full reload or splash. */
 (function(){
   'use strict';
   const started=Date.now();
@@ -63,19 +63,23 @@
       return window.load();
     };
 
-    /* Filter is intentionally a full route navigation. The filter screen itself is already
-       rendered by SELLB2 at /filters; reloading the route isolates it from any stale home-DOM
-       event state and prevents the home screen from becoming unresponsive. */
+    /* Filter opens through the existing SPA renderer. This keeps the current document alive,
+       avoids the startup splash, and does not trigger the listings loader while entering filters. */
     window.__sellb2OpenFilters=function(){
       try{
         const s=window.st;
         if(s){
           try{sessionStorage.setItem('sellb2_filter_state',JSON.stringify({cat:s.cat,type:s.type,state:s.state,district:s.district,city:s.city,locality:s.locality,min:s.min,max:s.max,furnishing:s.furnishing,parking:s.parking,possession:s.possession,facing:s.facing,condition:s.condition,year:s.year,wheels:s.wheels,registered:s.registered}));}catch(_){ }
         }
-        window.location.assign('/filters');
+        history.pushState({},'', '/filters');
+        s.route='/filters';
+        Promise.resolve(window.render()).catch(err=>{
+          console.error('SELLB2 filter render failed:',err);
+          window.toast?.('Filters could not be opened. Please try again.');
+        });
       }catch(err){
         console.error('SELLB2 filter navigation failed:',err);
-        try{window.location.href='/filters';}catch(_){window.toast?.('Filters could not be opened. Please try again.');}
+        window.toast?.('Filters could not be opened. Please try again.');
       }
     };
     window.__sellb2Sell=function(){navigate('/post');};
@@ -139,7 +143,7 @@
       .homehero .searchbar input,.homehero .searchbar button,.homehero .heroactions button{position:relative;z-index:21;pointer-events:auto!important;touch-action:manipulation}
     `;
     document.head.appendChild(style);
-    console.info('SELLB2 search/filter repair v9 installed');
+    console.info('SELLB2 search/filter repair v10 installed');
   }
   wait();
 })();
