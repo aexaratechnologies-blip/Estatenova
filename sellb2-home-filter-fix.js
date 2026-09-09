@@ -1,5 +1,6 @@
-/* SELLB2 FILTER-ONLY REPAIR v13
-   Filter button only. Never replaces the listings loader or search logic. */
+/* SELLB2 FILTER-ONLY REPAIR v14
+   Only the actual filter control is intercepted.
+   Never replaces load(), search, listings, or the router. */
 (function(){
   'use strict';
 
@@ -16,52 +17,76 @@
     }catch(_){ }
   }
 
+  let navigating=false;
+  let lastHandledAt=0;
+
   function openFilters(){
+    const now=Date.now();
+    if(navigating || now-lastHandledAt<500)return;
+    lastHandledAt=now;
     const s=window.st;
     if(!s){console.error('SELLB2: app state is not ready');return;}
     saveFilterState();
+    navigating=true;
     try{
+      const go=typeof window.setPath==='function' ? window.setPath : null;
+      if(go){
+        Promise.resolve(go('/filters')).catch(function(err){
+          console.error('SELLB2: filter navigation failed',err);
+        }).finally(function(){
+          setTimeout(function(){navigating=false;},0);
+        });
+        return;
+      }
       history.pushState({},'', '/filters');
       s.route='/filters';
       if(typeof window.render==='function'){
-        const result=window.render();
-        if(result&&typeof result.catch==='function')result.catch(function(err){
+        Promise.resolve(window.render()).catch(function(err){
           console.error('SELLB2: filter render failed',err);
+        }).finally(function(){
+          setTimeout(function(){navigating=false;},0);
         });
+      }else{
+        navigating=false;
       }
     }catch(err){
+      navigating=false;
       console.error('SELLB2: filter navigation failed',err);
     }
   }
 
+  function isFilterButton(target){
+    if(!target || !target.closest)return false;
+    const b=target.closest('button[onclick*="/filters"]');
+    if(b)return true;
+    const sb=target.closest('.searchbar button');
+    return !!(sb && String(sb.textContent||'').trim()==='☷');
+  }
+
+  function handle(ev){
+    if(!isFilterButton(ev.target))return;
+    ev.preventDefault();
+    ev.stopImmediatePropagation();
+    openFilters();
+  }
+
   function install(){
-    if(window.__sellb2FilterOnlyRepairV13)return;
-    window.__sellb2FilterOnlyRepairV13=true;
+    if(window.__sellb2FilterOnlyRepairV14)return;
+    window.__sellb2FilterOnlyRepairV14=true;
     window.__sellb2OpenFilters=openFilters;
 
-    function isFilterButton(target){
-      return !!(target&&target.closest&&target.closest('.homehero .searchbar button, .searchbar.compact button'));
-    }
-
-    function handle(ev){
-      if(!isFilterButton(ev.target))return;
-      ev.preventDefault();
-      ev.stopImmediatePropagation();
-      openFilters();
-    }
-
-    /* Capture touch/pointer first on Android, then click as a fallback. */
     document.addEventListener('pointerup',handle,true);
     document.addEventListener('touchend',handle,true);
     document.addEventListener('click',handle,true);
 
     const style=document.createElement('style');
     style.textContent='\
-      .homehero .searchbar{position:relative!important;z-index:20!important;pointer-events:auto!important;}\
-      .homehero .searchbar button,.searchbar.compact button{position:relative!important;z-index:30!important;pointer-events:auto!important;touch-action:manipulation!important;cursor:pointer!important;}\
+      .homehero .searchbar button,.searchbar.compact button{\
+        position:relative!important;z-index:30!important;pointer-events:auto!important;touch-action:manipulation!important;cursor:pointer!important;\
+      }\
     ';
     document.head.appendChild(style);
-    console.info('SELLB2 filter-only repair v13 installed');
+    console.info('SELLB2 filter-only repair v14 installed');
   }
 
   function wait(){
