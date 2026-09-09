@@ -1,11 +1,10 @@
-/* SELLB2 MESSAGE UNREAD INDICATOR v1
-   Shows a green unread dot for conversations with unseen incoming messages.
-   Opening a conversation marks incoming messages as read, which removes the dot.
+/* SELLB2 MESSAGE UNREAD INDICATOR v2
+   Green notification dot for unseen incoming messages.
+   Dot disappears after the conversation is opened/read.
 */
 (function(){
   'use strict';
 
-  var timer=null;
   var channel=null;
   var busy=false;
 
@@ -23,12 +22,6 @@
       .bottomnav .sellb2-nav-unread{position:absolute;top:6px;right:calc(50% - 18px);width:8px;height:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 2px var(--bg,#fff);pointer-events:none;}\
     ';
     document.head.appendChild(style);
-  }
-
-  function getConversationIds(){
-    var s=window.st;
-    if(!s||!Array.isArray(s.convs))return [];
-    return s.convs.map(function(c){return c&&c.id?String(c.id):''}).filter(Boolean);
   }
 
   function clearDots(){
@@ -71,9 +64,19 @@
     }
   }
 
+  async function getConversationIds(){
+    var d=db(),u=user();
+    if(!d||!u)return [];
+    var r=await d.from('conversations').select('id').or('buyer_id.eq.'+u.id+',seller_id.eq.'+u.id);
+    if(r.error){console.error('SELLB2 conversation query:',r.error);return []}
+    return (r.data||[]).map(function(x){return x&&x.id?String(x.id):''}).filter(Boolean);
+  }
+
   async function getUnreadIds(){
-    var d=db(),u=user(),ids=getConversationIds();
-    if(!d||!u||!ids.length)return [];
+    var d=db(),u=user();
+    if(!d||!u)return [];
+    var ids=await getConversationIds();
+    if(!ids.length)return [];
     var r=await d.from('messages')
       .select('conversation_id')
       .in('conversation_id',ids)
@@ -93,10 +96,16 @@
     try{
       ensureStyle();
       var unread=await getUnreadIds();
+      var active=(location.pathname||'').indexOf('/messages/')===0 ? String((location.pathname||'').split('/')[2]||'') : '';
+      if(active&&unread.indexOf(active)!==-1){
+        await markRead(active);
+        unread=unread.filter(function(id){return id!==active;});
+      }
       clearDots();
       if(!unread.length)return;
-      var onMessages=location.pathname==='/messages';
-      unread.forEach(function(id){if(onMessages)addRowDot(conversationRow(id));});
+      if(location.pathname==='/messages'){
+        unread.forEach(function(id){addRowDot(conversationRow(id));});
+      }
       addNavDot();
     }catch(e){console.error('SELLB2 unread indicator:',e)}
     finally{busy=false;}
@@ -119,13 +128,9 @@
     var p=location.pathname||'/';
     if(p.indexOf('/messages/')===0){
       var id=p.split('/')[2];
-      if(id){
-        markRead(id).then(function(){setTimeout(refresh,80)});
-      }
-    }else if(p==='/messages'){
-      setTimeout(refresh,80);
+      if(id)markRead(id).then(function(){setTimeout(refresh,80)});
     }else{
-      clearDots();
+      setTimeout(refresh,80);
     }
   }
 
@@ -136,11 +141,13 @@
       .on('postgres_changes',{event:'INSERT',schema:'public',table:'messages'},function(payload){
         var m=payload&&payload.new;
         if(!m||m.sender_id===u.id)return;
-        refresh();
+        var active=(location.pathname||'').split('/')[2]||'';
+        if((location.pathname||'').indexOf('/messages/')===0&&active===String(m.conversation_id)){
+          markRead(String(m.conversation_id)).then(refresh);
+        }else refresh();
       })
       .on('postgres_changes',{event:'UPDATE',schema:'public',table:'messages'},function(payload){
-        var m=payload&&payload.new;
-        if(m&&m.read_at)refresh();
+        if(payload&&payload.new&&payload.new.read_at)refresh();
       })
       .subscribe(function(status,err){if((status==='CHANNEL_ERROR'||status==='TIMED_OUT')&&err)console.error('SELLB2 unread realtime:',status,err)});
   }
@@ -160,9 +167,7 @@
       };
     }
     window.addEventListener('popstate',function(){setTimeout(watchRoute,80)});
-    timer=setInterval(function(){
-      if(user())refresh();
-    },3000);
+    setInterval(function(){if(user())refresh();},3000);
     watchRoute();
   }
   boot();
