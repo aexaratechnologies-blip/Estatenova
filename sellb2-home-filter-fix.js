@@ -1,6 +1,5 @@
-/* SELLB2 FILTER-ONLY REPAIR v12
-   IMPORTANT: this file NEVER replaces the application's listings loader.
-   It only owns the home filter button and routes to the existing /filters screen. */
+/* SELLB2 FILTER-ONLY REPAIR v13
+   Filter button only. Never replaces the listings loader or search logic. */
 (function(){
   'use strict';
 
@@ -22,37 +21,39 @@
     if(!s){console.error('SELLB2: app state is not ready');return;}
     saveFilterState();
     try{
-      if(typeof window.setPath==='function'){
-        window.setPath('/filters');
-        return;
-      }
-      if(typeof window.__sellb2Navigate==='function'){
-        window.__sellb2Navigate('/filters');
-        return;
-      }
       history.pushState({},'', '/filters');
       s.route='/filters';
-      if(typeof window.render==='function')window.render();
+      if(typeof window.render==='function'){
+        const result=window.render();
+        if(result&&typeof result.catch==='function')result.catch(function(err){
+          console.error('SELLB2: filter render failed',err);
+        });
+      }
     }catch(err){
       console.error('SELLB2: filter navigation failed',err);
     }
   }
 
   function install(){
-    if(window.__sellb2FilterOnlyRepairV12)return;
-    window.__sellb2FilterOnlyRepairV12=true;
+    if(window.__sellb2FilterOnlyRepairV13)return;
+    window.__sellb2FilterOnlyRepairV13=true;
     window.__sellb2OpenFilters=openFilters;
 
-    /* Capture only the filter button. Search, listings, load(), applyFilters(),
-       resetFilters(), and every other application function remain untouched. */
-    document.addEventListener('click',function(ev){
-      const target=ev.target;
-      const button=target&&target.closest?target.closest('.homehero .searchbar button, .searchbar.compact button'):null;
-      if(!button)return;
+    function isFilterButton(target){
+      return !!(target&&target.closest&&target.closest('.homehero .searchbar button, .searchbar.compact button'));
+    }
+
+    function handle(ev){
+      if(!isFilterButton(ev.target))return;
       ev.preventDefault();
       ev.stopImmediatePropagation();
       openFilters();
-    },true);
+    }
+
+    /* Capture touch/pointer first on Android, then click as a fallback. */
+    document.addEventListener('pointerup',handle,true);
+    document.addEventListener('touchend',handle,true);
+    document.addEventListener('click',handle,true);
 
     const style=document.createElement('style');
     style.textContent='\
@@ -60,7 +61,7 @@
       .homehero .searchbar button,.searchbar.compact button{position:relative!important;z-index:30!important;pointer-events:auto!important;touch-action:manipulation!important;cursor:pointer!important;}\
     ';
     document.head.appendChild(style);
-    console.info('SELLB2 filter-only repair v12 installed');
+    console.info('SELLB2 filter-only repair v13 installed');
   }
 
   function wait(){
