@@ -1,4 +1,4 @@
-/* SELLB2 home search/filter repair v8 — direct mobile-safe controls, no competing inline/capture handlers. */
+/* SELLB2 home search/filter repair v9 — filter opens as a clean route load so it cannot lock the current SPA. */
 (function(){
   'use strict';
   const started=Date.now();
@@ -12,7 +12,6 @@
     if(window.__sellb2SearchFilterRepairInstalled)return;
     window.__sellb2SearchFilterRepairInstalled=true;
 
-    /* The original loader is replaced with a bounded, deduplicated loader. */
     window.load=async function(){
       const seq=++requestNo,s=window.st;
       if(!s||!window.db)return;
@@ -55,6 +54,7 @@
       if(typeof window.setPath==='function')return window.setPath(path);
       history.pushState({},'',path);window.st.route=path;Promise.resolve(window.render()).catch(e=>console.error(e));
     }
+
     window.__sellb2RunSearch=async function(){
       const input=document.querySelector('.homehero .searchbar input');
       if(input)window.st.locality=input.value||'';
@@ -62,7 +62,22 @@
       navigate('/properties');
       return window.load();
     };
-    window.__sellb2OpenFilters=function(){navigate('/filters');};
+
+    /* Filter is intentionally a full route navigation. The filter screen itself is already
+       rendered by SELLB2 at /filters; reloading the route isolates it from any stale home-DOM
+       event state and prevents the home screen from becoming unresponsive. */
+    window.__sellb2OpenFilters=function(){
+      try{
+        const s=window.st;
+        if(s){
+          try{sessionStorage.setItem('sellb2_filter_state',JSON.stringify({cat:s.cat,type:s.type,state:s.state,district:s.district,city:s.city,locality:s.locality,min:s.min,max:s.max,furnishing:s.furnishing,parking:s.parking,possession:s.possession,facing:s.facing,condition:s.condition,year:s.year,wheels:s.wheels,registered:s.registered}));}catch(_){ }
+        }
+        window.location.assign('/filters');
+      }catch(err){
+        console.error('SELLB2 filter navigation failed:',err);
+        try{window.location.href='/filters';}catch(_){window.toast?.('Filters could not be opened. Please try again.');}
+      }
+    };
     window.__sellb2Sell=function(){navigate('/post');};
 
     window.applyFilters=async function(){
@@ -77,8 +92,6 @@
       Promise.resolve(window.render()).catch(e=>console.error(e));
     };
 
-    /* Make the actual mobile controls the source of truth. Inline onclick handlers are
-       removed from these four home controls so an old handler cannot race this repair. */
     function bindHomeControls(){
       const home=document.querySelector('.homehero');
       if(!home)return;
@@ -116,19 +129,17 @@
       bind(sellButton,window.__sellb2Sell);
     }
 
-    /* The SPA replaces home DOM on every render, so rebind after every mutation. */
     bindHomeControls();
     const observer=new MutationObserver(function(){bindHomeControls();});
     observer.observe(document.getElementById('app')||document.body,{childList:true,subtree:true});
 
-    /* Ensure no styling layer can accidentally make the controls untouchable. */
     const style=document.createElement('style');
     style.textContent=`
       .homehero .searchbar,.homehero .heroactions{position:relative;z-index:20;pointer-events:auto!important}
       .homehero .searchbar input,.homehero .searchbar button,.homehero .heroactions button{position:relative;z-index:21;pointer-events:auto!important;touch-action:manipulation}
     `;
     document.head.appendChild(style);
-    console.info('SELLB2 search/filter repair v8 installed');
+    console.info('SELLB2 search/filter repair v9 installed');
   }
   wait();
 })();
