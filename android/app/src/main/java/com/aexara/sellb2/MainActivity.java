@@ -42,7 +42,7 @@ public class MainActivity extends Activity {
         setContentView(root);
 
         try {
-            webView = new WebView(getApplicationContext());
+            webView = new WebView(this);
             webView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
             webView.setBackgroundColor(BG);
             webView.getSettings().setJavaScriptEnabled(true);
@@ -55,9 +55,21 @@ public class MainActivity extends Activity {
             webView.getSettings().setBuiltInZoomControls(false);
             webView.getSettings().setDisplayZoomControls(false);
             webView.getSettings().setJavaScriptCanOpenWindowsAutomatically(false);
-            webView.getSettings().setUserAgentString(webView.getSettings().getUserAgentString() + " SELLB2-Android/1.5");
+            webView.getSettings().setUserAgentString(webView.getSettings().getUserAgentString() + " SELLB2-Android/1.6");
             CookieManager.getInstance().setAcceptCookie(true);
             CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
+
+            if (Build.VERSION.SDK_INT >= 21) {
+                webView.setOnApplyWindowInsetsListener((view, insets) -> {
+                    if (Build.VERSION.SDK_INT >= 30) {
+                        android.graphics.Insets bars = insets.getInsets(WindowInsets.Type.systemBars());
+                        view.setPadding(bars.left, bars.top, bars.right, bars.bottom);
+                    } else {
+                        view.setPadding(insets.getSystemWindowInsetLeft(), insets.getSystemWindowInsetTop(), insets.getSystemWindowInsetRight(), insets.getSystemWindowInsetBottom());
+                    }
+                    return insets;
+                });
+            }
 
             webView.setWebViewClient(new WebViewClient() {
                 @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
@@ -103,7 +115,7 @@ public class MainActivity extends Activity {
             if (savedInstanceState == null) webView.loadUrl(HOME_URL);
             else { webView.restoreState(savedInstanceState); hideSplash(); }
         } catch (Throwable fatal) {
-            showStartupRecovery(root, fatal);
+            showStartupRecovery(root);
         }
     }
 
@@ -129,6 +141,7 @@ public class MainActivity extends Activity {
     }
 
     private void showRendererRecovery() {
+        if (splash != null) splash.setVisibility(View.GONE);
         if (webView != null) webView.setVisibility(View.GONE);
         TextView recovery = new TextView(this);
         recovery.setText("SELLB2\n\nThe web engine restarted.\nTap to reload.");
@@ -140,7 +153,7 @@ public class MainActivity extends Activity {
         addContentView(recovery, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
     }
 
-    private void showStartupRecovery(FrameLayout root, Throwable fatal) {
+    private void showStartupRecovery(FrameLayout root) {
         root.removeAllViews();
         TextView recovery = new TextView(this);
         recovery.setText("SELLB2\n\nUnable to start the app engine.\nTap to retry.");
