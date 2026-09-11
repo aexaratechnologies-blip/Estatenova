@@ -13,6 +13,7 @@ import android.view.Window;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 import android.webkit.CookieManager;
+import android.webkit.RenderProcessGoneDetail;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
@@ -55,21 +56,9 @@ public class MainActivity extends Activity {
             webView.getSettings().setBuiltInZoomControls(false);
             webView.getSettings().setDisplayZoomControls(false);
             webView.getSettings().setJavaScriptCanOpenWindowsAutomatically(false);
-            webView.getSettings().setUserAgentString(webView.getSettings().getUserAgentString() + " SELLB2-Android/1.6");
+            webView.getSettings().setUserAgentString(webView.getSettings().getUserAgentString() + " SELLB2-Android/1.7");
             CookieManager.getInstance().setAcceptCookie(true);
             CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
-
-            if (Build.VERSION.SDK_INT >= 21) {
-                webView.setOnApplyWindowInsetsListener((view, insets) -> {
-                    if (Build.VERSION.SDK_INT >= 30) {
-                        android.graphics.Insets bars = insets.getInsets(WindowInsets.Type.systemBars());
-                        view.setPadding(bars.left, bars.top, bars.right, bars.bottom);
-                    } else {
-                        view.setPadding(insets.getSystemWindowInsetLeft(), insets.getSystemWindowInsetTop(), insets.getSystemWindowInsetRight(), insets.getSystemWindowInsetBottom());
-                    }
-                    return insets;
-                });
-            }
 
             webView.setWebViewClient(new WebViewClient() {
                 @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
