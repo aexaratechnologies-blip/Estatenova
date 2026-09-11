@@ -1,6 +1,7 @@
 package com.aexara.sellb2;
 
 import android.app.Activity;
+import android.content.ClipData;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
@@ -18,6 +19,8 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+
+import java.util.ArrayList;
 
 public class MainActivity extends Activity {
     private static final int FILE_CHOOSER_REQUEST = 4101;
@@ -47,12 +50,10 @@ public class MainActivity extends Activity {
         webView.getSettings().setSupportMultipleWindows(false);
         webView.getSettings().setBuiltInZoomControls(false);
         webView.getSettings().setDisplayZoomControls(false);
-        webView.getSettings().setUserAgentString(webView.getSettings().getUserAgentString() + " SELLB2-Android/1.2");
+        webView.getSettings().setUserAgentString(webView.getSettings().getUserAgentString() + " SELLB2-Android/1.3");
         CookieManager.getInstance().setAcceptCookie(true);
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
 
-        // Android 15+ can enforce edge-to-edge. Keep the web app's interactive area
-        // clear of the system status/navigation bars by applying the live insets.
         webView.setOnApplyWindowInsetsListener((view, insets) -> {
             if (Build.VERSION.SDK_INT >= 30) {
                 android.graphics.Insets bars = insets.getInsets(WindowInsets.Type.systemBars());
@@ -87,13 +88,20 @@ public class MainActivity extends Activity {
             public boolean onShowFileChooser(WebView view, ValueCallback<Uri[]> callback, FileChooserParams params) {
                 if (fileChooserCallback != null) fileChooserCallback.onReceiveValue(null);
                 fileChooserCallback = callback;
+
                 try {
-                    Intent intent = params != null ? params.createIntent() : new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                    // Use Android's document/gallery picker directly instead of relying on
+                    // WebView's createIntent(), which can return an incompatible picker on
+                    // some Android versions/devices. This also preserves multiple selection.
+                    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
                     intent.addCategory(Intent.CATEGORY_OPENABLE);
-                    if (params == null) {
-                        intent.setType("image/*");
-                        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-                    }
+                    intent.setType(resolveMimeType(params));
+                    boolean allowMultiple = params != null
+                            && params.getMode() == FileChooserParams.MODE_OPEN_MULTIPLE;
+                    intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, allowMultiple);
+                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+
                     startActivityForResult(intent, FILE_CHOOSER_REQUEST);
                     return true;
                 } catch (Exception ignored) {
@@ -105,7 +113,6 @@ public class MainActivity extends Activity {
 
         root.addView(webView);
 
-        // Exact SELLB2 artwork supplied for the app's startup branding.
         splash = new ImageView(this);
         splash.setImageResource(com.aexara.sellb2.R.drawable.sellb2_logo);
         splash.setScaleType(ImageView.ScaleType.FIT_CENTER);
@@ -122,6 +129,21 @@ public class MainActivity extends Activity {
             webView.restoreState(savedInstanceState);
             hideSplash();
         }
+    }
+
+    private String resolveMimeType(FileChooserParams params) {
+        if (params == null || params.getAcceptTypes() == null || params.getAcceptTypes().length == 0) {
+            return "image/*";
+        }
+        String fallback = "image/*";
+        for (String type : params.getAcceptTypes()) {
+            if (type == null) continue;
+            String trimmed = type.trim();
+            if (trimmed.length() == 0) continue;
+            if (trimmed.contains("/")) return trimmed;
+            if (trimmed.equalsIgnoreCase("image")) return "image/*";
+        }
+        return fallback;
     }
 
     private void hideSplash() {
@@ -149,7 +171,31 @@ public class MainActivity extends Activity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode != FILE_CHOOSER_REQUEST) return;
-        Uri[] result = resultCode == RESULT_OK ? WebChromeClient.FileChooserParams.parseResult(resultCode, data) : null;
+
+        Uri[] result = null;
+        if (resultCode == RESULT_OK && data != null) {
+            ArrayList<Uri> uris = new ArrayList<>();
+            ClipData clipData = data.getClipData();
+            if (clipData != null) {
+                for (int i = 0; i < clipData.getItemCount(); i++) {
+                    Uri uri = clipData.getItemAt(i).getUri();
+                    if (uri != null) uris.add(uri);
+                }
+            } else if (data.getData() != null) {
+                uris.add(data.getData());
+            }
+
+            if (!uris.isEmpty()) {
+                result = uris.toArray(new Uri[0]);
+                for (Uri uri : result) {
+                    try {
+                        getContentResolver().takePersistableUriPermission(
+                                uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    } catch (Exception ignored) { }
+                }
+            }
+        }
+
         if (fileChooserCallback != null) fileChooserCallback.onReceiveValue(result);
         fileChooserCallback = null;
     }
