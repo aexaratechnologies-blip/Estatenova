@@ -1,4 +1,4 @@
-name: Build SELLB2 Android APK
+name: Build SELLB2 Production Android
 
 on:
   workflow_dispatch:
@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      actions: write
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,41 +28,63 @@ jobs:
         with:
           gradle-version: '9.6.0'
 
-      - name: Build debug APK
-        working-directory: android
-        run: gradle --no-daemon assembleDebug
-
-      - name: Build release APK and AAB
-        working-directory: android
-        run: gradle --no-daemon assembleRelease bundleRelease
-
-      - name: Report package sizes
-        working-directory: android
+      - name: Prepare release signing key
+        shell: bash
+        env:
+          SELLB2_KEYSTORE_B64: ${{ secrets.SELLB2_KEYSTORE_B64 }}
+          SELLB2_STORE_PASSWORD_SECRET: ${{ secrets.SELLB2_STORE_PASSWORD }}
+          SELLB2_KEY_ALIAS_SECRET: ${{ secrets.SELLB2_KEY_ALIAS }}
+          SELLB2_KEY_PASSWORD_SECRET: ${{ secrets.SELLB2_KEY_PASSWORD }}
         run: |
-          ls -lh app/build/outputs/apk/debug/app-debug.apk
-          ls -lh app/build/outputs/apk/release/app-release-unsigned.apk
-          ls -lh app/build/outputs/bundle/release/app-release.aab
+          set -euo pipefail
+          KEYSTORE="$RUNNER_TEMP/sellb2-release.jks"
+          if [ -n "${SELLB2_KEYSTORE_B64:-}" ] && [ -n "${SELLB2_STORE_PASSWORD_SECRET:-}" ] && [ -n "${SELLB2_KEY_ALIAS_SECRET:-}" ] && [ -n "${SELLB2_KEY_PASSWORD_SECRET:-}" ]; then
+            printf '%s' "$SELLB2_KEYSTORE_B64" | base64 --decode > "$KEYSTORE"
+            echo "SELLB2_STORE_PASSWORD=$SELLB2_STORE_PASSWORD_SECRET" >> "$GITHUB_ENV"
+            echo "SELLB2_KEY_ALIAS=$SELLB2_KEY_ALIAS_SECRET" >> "$GITHUB_ENV"
+            echo "SELLB2_KEY_PASSWORD=$SELLB2_KEY_PASSWORD_SECRET" >> "$GITHUB_ENV"
+          else
+            keytool -genkeypair -v \
+              -keystore "$KEYSTORE" \
+              -storetype JKS \
+              -alias sellb2-production \
+              -keyalg RSA \
+              -keysize 2048 \
+              -validity 10000 \
+              -storepass sellb2-production-store \
+              -keypass sellb2-production-key \
+              -dname "CN=SELLB2, OU=Aexara Technologies, O=Aexara Technologies Pvt Ltd, L=India, ST=Bihar, C=IN"
+            echo "SELLB2_STORE_PASSWORD=sellb2-production-store" >> "$GITHUB_ENV"
+            echo "SELLB2_KEY_ALIAS=sellb2-production" >> "$GITHUB_ENV"
+            echo "SELLB2_KEY_PASSWORD=sellb2-production-key" >> "$GITHUB_ENV"
+          fi
+          echo "SELLB2_KEYSTORE=$KEYSTORE" >> "$GITHUB_ENV"
 
-      - name: Upload debug APK
+      - name: Build production APK and AAB
+        working-directory: android
+        run: gradle --no-daemon clean assembleRelease bundleRelease
+
+      - name: Verify release APK
+        run: |
+          set -euo pipefail
+          APK="android/app/build/outputs/apk/release/app-release.apk"
+          test -s "$APK"
+          APKSIGNER=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -n 1)
+          "$APKSIGNER" verify --verbose "$APK"
+          ls -lh "$APK" android/app/build/outputs/bundle/release/app-release.aab
+
+      - name: Upload production APK
         uses: actions/upload-artifact@v4
         with:
-          name: SELLB2-debug-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: SELLB2-production-release-apk
+          path: android/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
-          retention-days: 14
+          retention-days: 30
 
-      - name: Upload release APK
+      - name: Upload production AAB
         uses: actions/upload-artifact@v4
         with:
-          name: SELLB2-release-apk
-          path: android/app/build/outputs/apk/release/app-release-unsigned.apk
-          if-no-files-found: error
-          retention-days: 14
-
-      - name: Upload release AAB
-        uses: actions/upload-artifact@v4
-        with:
-          name: SELLB2-release-aab
+          name: SELLB2-production-release-aab
           path: android/app/build/outputs/bundle/release/app-release.aab
           if-no-files-found: error
-          retention-days: 14
+          retention-days: 30
