@@ -50,7 +50,7 @@ public class MainActivity extends Activity {
         webView.getSettings().setSupportMultipleWindows(false);
         webView.getSettings().setBuiltInZoomControls(false);
         webView.getSettings().setDisplayZoomControls(false);
-        webView.getSettings().setUserAgentString(webView.getSettings().getUserAgentString() + " SELLB2-Android/1.3");
+        webView.getSettings().setUserAgentString(webView.getSettings().getUserAgentString() + " SELLB2-Android/1.4");
         CookieManager.getInstance().setAcceptCookie(true);
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
 
@@ -90,18 +90,14 @@ public class MainActivity extends Activity {
                 fileChooserCallback = callback;
 
                 try {
-                    // Use Android's document/gallery picker directly instead of relying on
-                    // WebView's createIntent(), which can return an incompatible picker on
-                    // some Android versions/devices. This also preserves multiple selection.
                     Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
                     intent.addCategory(Intent.CATEGORY_OPENABLE);
                     intent.setType(resolveMimeType(params));
                     boolean allowMultiple = params != null
-                            && params.getMode() == FileChooserParams.MODE_OPEN_MULTIPLE;
+                            && params.getMode() == WebChromeClient.FileChooserParams.MODE_OPEN_MULTIPLE;
                     intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, allowMultiple);
                     intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                     intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
-
                     startActivityForResult(intent, FILE_CHOOSER_REQUEST);
                     return true;
                 } catch (Exception ignored) {
@@ -131,11 +127,10 @@ public class MainActivity extends Activity {
         }
     }
 
-    private String resolveMimeType(FileChooserParams params) {
+    private String resolveMimeType(WebChromeClient.FileChooserParams params) {
         if (params == null || params.getAcceptTypes() == null || params.getAcceptTypes().length == 0) {
             return "image/*";
         }
-        String fallback = "image/*";
         for (String type : params.getAcceptTypes()) {
             if (type == null) continue;
             String trimmed = type.trim();
@@ -143,7 +138,7 @@ public class MainActivity extends Activity {
             if (trimmed.contains("/")) return trimmed;
             if (trimmed.equalsIgnoreCase("image")) return "image/*";
         }
-        return fallback;
+        return "image/*";
     }
 
     private void hideSplash() {
