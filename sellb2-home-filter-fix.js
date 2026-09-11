@@ -1,64 +1,34 @@
-/* SELLB2 FILTER-ONLY REPAIR v14
-   Only the actual filter control is intercepted.
-   Never replaces load(), search, listings, or the router. */
+/* SELLB2 FILTER-ONLY REPAIR v15
+   The app state is intentionally kept in a lexical const, not window.st.
+   Therefore navigation must call the app's global setPath(), which closes over the real state. */
 (function(){
   'use strict';
 
-  function saveFilterState(){
-    const s=window.st;
-    if(!s)return;
-    try{
-      sessionStorage.setItem('sellb2_filter_state',JSON.stringify({
-        cat:s.cat,type:s.type,state:s.state,district:s.district,city:s.city,
-        locality:s.locality,min:s.min,max:s.max,furnishing:s.furnishing,
-        parking:s.parking,possession:s.possession,facing:s.facing,
-        condition:s.condition,year:s.year,wheels:s.wheels,registered:s.registered
-      }));
-    }catch(_){ }
-  }
-
-  let navigating=false;
+  let busy=false;
   let lastHandledAt=0;
 
   function openFilters(){
     const now=Date.now();
-    if(navigating || now-lastHandledAt<500)return;
+    if(busy || now-lastHandledAt<500)return;
     lastHandledAt=now;
-    const s=window.st;
-    if(!s){console.error('SELLB2: app state is not ready');return;}
-    saveFilterState();
-    navigating=true;
+    const go=window.setPath;
+    if(typeof go!=='function'){
+      console.error('SELLB2: setPath is not available yet');
+      return;
+    }
+    busy=true;
     try{
-      const go=typeof window.setPath==='function' ? window.setPath : null;
-      if(go){
-        Promise.resolve(go('/filters')).catch(function(err){
-          console.error('SELLB2: filter navigation failed',err);
-        }).finally(function(){
-          setTimeout(function(){navigating=false;},0);
-        });
-        return;
-      }
-      history.pushState({},'', '/filters');
-      s.route='/filters';
-      if(typeof window.render==='function'){
-        Promise.resolve(window.render()).catch(function(err){
-          console.error('SELLB2: filter render failed',err);
-        }).finally(function(){
-          setTimeout(function(){navigating=false;},0);
-        });
-      }else{
-        navigating=false;
-      }
+      go('/filters');
     }catch(err){
-      navigating=false;
       console.error('SELLB2: filter navigation failed',err);
     }
+    setTimeout(function(){busy=false;},250);
   }
 
   function isFilterButton(target){
     if(!target || !target.closest)return false;
-    const b=target.closest('button[onclick*="/filters"]');
-    if(b)return true;
+    const exact=target.closest('button[onclick*="/filters"]');
+    if(exact)return true;
     const sb=target.closest('.searchbar button');
     return !!(sb && String(sb.textContent||'').trim()==='☷');
   }
@@ -66,31 +36,24 @@
   function handle(ev){
     if(!isFilterButton(ev.target))return;
     ev.preventDefault();
-    ev.stopImmediatePropagation();
+    ev.stopPropagation();
     openFilters();
   }
 
   function install(){
-    if(window.__sellb2FilterOnlyRepairV14)return;
-    window.__sellb2FilterOnlyRepairV14=true;
+    if(window.__sellb2FilterOnlyRepairV15)return;
+    window.__sellb2FilterOnlyRepairV15=true;
     window.__sellb2OpenFilters=openFilters;
-
-    document.addEventListener('pointerup',handle,true);
-    document.addEventListener('touchend',handle,true);
     document.addEventListener('click',handle,true);
-
+    document.addEventListener('pointerup',handle,true);
     const style=document.createElement('style');
-    style.textContent='\
-      .homehero .searchbar button,.searchbar.compact button{\
-        position:relative!important;z-index:30!important;pointer-events:auto!important;touch-action:manipulation!important;cursor:pointer!important;\
-      }\
-    ';
+    style.textContent='.homehero .searchbar button,.searchbar.compact button{position:relative!important;z-index:30!important;pointer-events:auto!important;touch-action:manipulation!important;cursor:pointer!important}';
     document.head.appendChild(style);
-    console.info('SELLB2 filter-only repair v14 installed');
+    console.info('SELLB2 filter-only repair v15 installed');
   }
 
   function wait(){
-    if(window.st&&typeof window.render==='function')install();
+    if(typeof window.setPath==='function')install();
     else setTimeout(wait,50);
   }
   wait();
