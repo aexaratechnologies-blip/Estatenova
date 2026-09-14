@@ -34,7 +34,6 @@
         return;
       }
 
-      /* Get the exact seller for this exact listing. */
       const listingResult=await withTimeout(
         client.from('listings').select('id,owner_id').eq('id',listingId).eq('status','active').eq('approval_status','approved').maybeSingle(),
         5000,
@@ -47,9 +46,9 @@
       const sellerId=listingResult.data.owner_id;
       if(sellerId===user.id){toast('You cannot message yourself.');return;}
 
-      /* Reuse the existing conversation when one already exists. */
-      let conversationResult=await withTimeout(
-        client.from('conversations').select('id').eq('listing_id',listingId).eq('buyer_id',user.id).eq('seller_id',sellerId).maybeSingle(),
+      /* Reuse the first matching conversation. */
+      const conversationResult=await withTimeout(
+        client.from('conversations').select('id').eq('listing_id',listingId).eq('buyer_id',user.id).eq('seller_id',sellerId).limit(1),
         5000,
         'Could not open the seller chat.'
       );
@@ -58,7 +57,7 @@
         return;
       }
 
-      let conversationId=conversationResult.data?.id;
+      let conversationId=conversationResult.data?.[0]?.id||null;
       if(!conversationId){
         /* Direct insert is protected by the conversations_insert_buyer RLS policy. */
         const created=await withTimeout(
@@ -67,16 +66,15 @@
           'Could not create the seller chat.'
         );
         if(created.error){
-          /* A concurrent click/device may have created it; fetch it once more. */
           const retry=await withTimeout(
-            client.from('conversations').select('id').eq('listing_id',listingId).eq('buyer_id',user.id).eq('seller_id',sellerId).maybeSingle(),
+            client.from('conversations').select('id').eq('listing_id',listingId).eq('buyer_id',user.id).eq('seller_id',sellerId).limit(1),
             3000,
             'Could not open the seller chat.'
           );
-          conversationId=retry.data?.id||null;
+          conversationId=retry.data?.[0]?.id||null;
           if(!conversationId){toast(created.error.message||'Could not create the seller chat.');return;}
         }else{
-          conversationId=created.data?.id;
+          conversationId=created.data?.id||null;
         }
       }
       if(!conversationId){toast('Could not open the seller chat.');return;}
