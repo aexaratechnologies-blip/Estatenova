@@ -1,0 +1,1 @@
+SELLB2 monthly upgrade page: ₹49 contact-view entitlement and ₹89 seller-50-listings entitlement. Real payment activation requires a verified payment gateway integration.
