@@ -18,10 +18,7 @@
     else console.warn('SELLB2:',message);
   }
 
-  async function messageSeller(listingId){
-    if(busy)return;
-    if(!listingId){notify('Could not identify this listing');return;}
-    busy=true;
+  async function finishSellerChat(listingId){
     try{
       const db=getClient();
       if(!db){notify('Messaging is not available right now');return;}
@@ -29,6 +26,8 @@
       const session=await db.auth.getSession();
       if(session.error){
         notify('Please sign in to message the seller');
+        if(typeof window.setPath==='function')window.setPath('/auth');
+        else location.assign('/auth');
         return;
       }
       if(!session.data?.session){
@@ -53,9 +52,18 @@
     }catch(err){
       console.error('SELLB2 message seller:',err);
       notify(err?.message||'Could not open seller chat');
-    }finally{
-      busy=false;
     }
+  }
+
+  function messageSeller(listingId){
+    if(busy||!listingId)return;
+    busy=true;
+
+    /* Navigate immediately. Conversation creation continues in the background. */
+    if(typeof window.setPath==='function')window.setPath('/messages');
+    else location.assign('/messages');
+
+    finishSellerChat(listingId).finally(function(){busy=false;});
   }
 
   window.__sellb2MessageSeller=messageSeller;
@@ -65,8 +73,7 @@
     const raw=button.getAttribute('onclick')||'';
     const match=raw.match(/(?:chatStart|messageSeller)\s*\(\s*['\"]([^'\"]+)['\"]\s*\)/i);
     if(match)return match[1];
-    const href=button.getAttribute('data-listing-id');
-    return href||null;
+    return button.getAttribute('data-listing-id')||null;
   }
 
   function wireButton(button){
