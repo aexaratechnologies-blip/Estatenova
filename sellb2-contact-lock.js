@@ -38,7 +38,7 @@
   const style=()=>{
     if(document.getElementById('sellb2-contact-lock-style'))return;
     const s=document.createElement('style');s.id='sellb2-contact-lock-style';
-    s.textContent='.sellb2-contact-gate{margin:16px 0;padding:18px;border:1px solid #dfe5ea;border-radius:16px;background:var(--card,#fff);box-shadow:0 8px 24px rgba(0,0,0,.05)}.sellb2-contact-gate h3{margin:0 0 6px}.sellb2-contact-gate p{margin:0 0 12px;color:#667085}.sellb2-contact-gate button{width:100%;border:0;border-radius:12px;padding:13px 16px;font-weight:700;cursor:pointer;background:#111;color:#fff}.sellb2-contact-gate .ok{margin-top:10px;padding:12px;border-radius:10px;background:#f3faf5}.sellb2-contact-locked{pointer-events:none;opacity:.7}';
+    s.textContent='.sellb2-contact-gate{margin:16px 0;padding:18px;border:1px solid #dfe5ea;border-radius:16px;background:#fff;color:#111827;box-shadow:0 8px 24px rgba(0,0,0,.05)}.sellb2-contact-gate h3{margin:0 0 6px;color:#111827!important;font-weight:800}.sellb2-contact-gate p{margin:0 0 12px;color:#475467!important;line-height:1.45}.sellb2-contact-gate button{width:100%;border:0;border-radius:12px;padding:13px 16px;font-weight:700;cursor:pointer;background:#111;color:#fff}.sellb2-contact-gate .result{color:#111827!important;line-height:1.5}.sellb2-contact-gate .result b{color:#111827!important}.sellb2-contact-gate .result span{color:#475467!important}.sellb2-contact-gate .result.ok{margin-top:10px;padding:12px;border-radius:10px;background:#f3faf5;color:#111827!important}.sellb2-contact-locked{pointer-events:none;opacity:.7}.sellb2-contact-gate .result button{color:#fff!important}';
     document.head.appendChild(s);
   };
   const gate=()=>{
