@@ -61,9 +61,21 @@
       }
       const title=document.getElementById('sellb2ChatListing');if(title)title.textContent='Seller chat';
       const msgs=await client.from('messages').select('*').eq('conversation_id',activeConversationId).order('created_at');
-      if(!msgs.error){const body=document.getElementById('sellb2InstantBody');if(body){body.innerHTML='';const uid=user.id;(msgs.data||[]).forEach(m=>addBubble(m.body,m.sender_id===uid));if(!msgs.data?.length)body.innerHTML='<div id="sellb2ChatStatus" style="opacity:.65">Start the conversation with the seller.</div>';}}
+      if(!msgs.error){
+        const body=document.getElementById('sellb2InstantBody');
+        if(body){
+          body.innerHTML='';
+          const uid=user.id;
+          (msgs.data||[]).forEach(m=>addBubble(m.body,m.sender_id===uid));
+          if(!msgs.data?.length)body.innerHTML='<div id="sellb2ChatStatus" style="opacity:.65">Start the conversation with the seller.</div>';
+        }
       }
-      const queued=pending.splice(0);for(const text of queued){document.getElementById('sellb2InstantInput').value=text;await sendMessage();}
+      const queued=pending.splice(0);
+      for(const text of queued){
+        const input=document.getElementById('sellb2InstantInput');
+        if(input)input.value=text;
+        await sendMessage();
+      }
     }catch(e){console.error('SELLB2 seller chat:',e);toast(e?.message||'Could not open the seller chat.');}
   }
 
