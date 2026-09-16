@@ -22,15 +22,18 @@
     const grid=section.querySelector('.categories.large');
     if(!grid)return;
     if(grid.dataset.sellb2HomeCategories==='12')return;
-    grid.innerHTML=CATS.map((x,i)=>`<button type="button" class="sellb2-home-cat" data-cat="${x.cat}" data-type="${x.type.replace(/"/g,'&quot;')}" aria-label="${x.label}"><i>${svg(x.icon)}</i><span>${x.label}</span><small>${x.sub}</small></button>`).join('');
+    grid.innerHTML=CATS.map(x=>`<button type="button" class="sellb2-home-cat" data-cat="${x.cat}" data-type="${x.type.replace(/"/g,'&quot;')}" aria-label="${x.label}"><i>${svg(x.icon)}</i><span>${x.label}</span><small>${x.sub}</small></button>`).join('');
     grid.classList.add('sellb2-home-category-grid');
     grid.dataset.sellb2HomeCategories='12';
     grid.querySelectorAll('.sellb2-home-cat').forEach(btn=>btn.addEventListener('click',function(){
       const cat=this.dataset.cat,type=this.dataset.type;
-      if(window.st){window.st.cat=cat;window.st.type=type;}
       const path=cat==='property'?'/properties':cat==='vehicle'?'/vehicles':'/businesses';
       if(typeof window.setPath==='function')window.setPath(path);else location.assign(path);
-      if(typeof window.load==='function')window.load();
+      setTimeout(function(){
+        const chips=[...document.querySelectorAll('.chips button')];
+        const match=chips.find(function(b){return b.textContent.trim().toLowerCase()===type.trim().toLowerCase()});
+        if(match)match.click();
+      },40);
     }));
   }
   function style(){
