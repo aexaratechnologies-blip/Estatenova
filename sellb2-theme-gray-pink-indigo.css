@@ -1,0 +1,62 @@
+/* SELLB2 — Gray + Pinkish Indigo/Violet theme */
+:root{
+  --sellb2-gray-950:#20222b;
+  --sellb2-gray-900:#2b2e38;
+  --sellb2-gray-800:#3a3e49;
+  --sellb2-gray-700:#535866;
+  --sellb2-gray-600:#6f7482;
+  --sellb2-gray-500:#9297a5;
+  --sellb2-gray-300:#d5d8df;
+  --sellb2-gray-200:#e6e8ed;
+  --sellb2-gray-100:#f1f2f5;
+  --sellb2-gray-50:#f7f7f9;
+  --sellb2-pink-indigo:#a76aa5;
+  --sellb2-pink-indigo-2:#7b6fd6;
+  --sellb2-indigo:#6875d8;
+  --sellb2-violet:#8066c9;
+  --sellb2-gradient:linear-gradient(135deg,#8b718f 0%,#a76aa5 45%,#7076d6 100%);
+  --sellb2-soft-gradient:linear-gradient(135deg,#f0e9f1 0%,#eeeafa 100%);
+}
+
+/* Core surfaces and typography */
+body{background:var(--sellb2-gray-50)!important;color:var(--sellb2-gray-900)!important}
+header,.header,.topbar,.navbar,.nav,.appbar,.toolbar{background:rgba(255,255,255,.96)!important;color:var(--sellb2-gray-900)!important;border-color:var(--sellb2-gray-200)!important}
+button,.btn,[role="button"]{border-color:var(--sellb2-gray-300)!important}
+button.primary,.btn.primary,.primary,.cta,.sellbtn,[class*="primary"]{background:var(--sellb2-gradient)!important;color:#fff!important;border-color:transparent!important}
+
+/* Common accent text / links */
+a,.link,.accent,[class*="accent"]{color:var(--sellb2-indigo)!important}
+
+/* Cards, inputs and separators */
+.card,.listing-card,.panel,.box,.modal,.sheet,.profilemenu,.searchbar,.formcard{border-color:var(--sellb2-gray-200)!important}
+input,select,textarea{border-color:var(--sellb2-gray-300)!important;background:#fff!important;color:var(--sellb2-gray-900)!important}
+input:focus,select:focus,textarea:focus{border-color:var(--sellb2-pink-indigo-2)!important;box-shadow:0 0 0 3px rgba(123,111,214,.14)!important;outline:none!important}
+
+/* Category and marketplace accents */
+.category,.cat,.category-card,.sellb2-ref-cat{background:#fff!important;border-color:var(--sellb2-gray-200)!important}
+.category:hover,.cat:hover,.category-card:hover,.sellb2-ref-cat:hover{border-color:#b79bc1!important;background:var(--sellb2-soft-gradient)!important}
+.active,.selected,.is-active{border-color:var(--sellb2-pink-indigo)!important;color:var(--sellb2-indigo)!important}
+
+/* Header/menu accents */
+.menu,.drawer,.sidemenu{background:#fff!important;color:var(--sellb2-gray-900)!important}
+.menu button:hover,.drawer button:hover,.sidemenu button:hover{background:var(--sellb2-soft-gradient)!important}
+
+/* SELLB2 brand: keep supplied logo artwork, but make generic accent elements match */
+.brand-accent,.brand-gradient,.gradient{background:var(--sellb2-gradient)!important}
+
+/* Bottom navigation / floating actions */
+.bottomnav,.bottom-nav,.tabbar,.fab{border-color:var(--sellb2-gray-200)!important}
+.bottomnav .active,.bottom-nav .active,.tabbar .active{color:var(--sellb2-indigo)!important}
+
+/* Dark mode remains dark, with the new accent family */
+body.dark,body[data-theme="dark"]{background:#1f2027!important;color:#f1f2f5!important}
+body.dark header,body.dark .header,body.dark .menu,body.dark .drawer,body[data-theme="dark"] header,body[data-theme="dark"] .header,body[data-theme="dark"] .menu,body[data-theme="dark"] .drawer{background:#292b34!important;color:#f1f2f5!important;border-color:#414451!important}
+body.dark input,body.dark select,body.dark textarea,body[data-theme="dark"] input,body[data-theme="dark"] select,body[data-theme="dark"] textarea{background:#292b34!important;color:#f1f2f5!important;border-color:#4b4f5d!important}
+
+/* Splash / loading screen */
+#boot{background:var(--sellb2-gradient)!important}
+
+/* Mobile polish */
+@media(max-width:600px){
+  button.primary,.btn.primary,.primary,.cta,.sellbtn,[class*="primary"]{box-shadow:0 8px 20px rgba(123,111,214,.18)!important}
+}
