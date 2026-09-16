@@ -1,62 +1,82 @@
-/* SELLB2 — Gray + Pinkish Indigo/Violet theme */
+/* SELLB2 — Soft Gray + Pinkish Indigo/Violet light theme. Dark mode is intentionally untouched. */
 :root{
-  --sellb2-gray-950:#20222b;
-  --sellb2-gray-900:#2b2e38;
-  --sellb2-gray-800:#3a3e49;
-  --sellb2-gray-700:#535866;
-  --sellb2-gray-600:#6f7482;
-  --sellb2-gray-500:#9297a5;
-  --sellb2-gray-300:#d5d8df;
-  --sellb2-gray-200:#e6e8ed;
-  --sellb2-gray-100:#f1f2f5;
-  --sellb2-gray-50:#f7f7f9;
-  --sellb2-pink-indigo:#a76aa5;
-  --sellb2-pink-indigo-2:#7b6fd6;
-  --sellb2-indigo:#6875d8;
-  --sellb2-violet:#8066c9;
-  --sellb2-gradient:linear-gradient(135deg,#8b718f 0%,#a76aa5 45%,#7076d6 100%);
-  --sellb2-soft-gradient:linear-gradient(135deg,#f0e9f1 0%,#eeeafa 100%);
+  --sellb2-gray-50:#f7f7fb;--sellb2-gray-100:#f0f0f5;--sellb2-gray-200:#e2e2eb;--sellb2-gray-300:#d4d4e0;
+  --sellb2-gray-500:#7d8090;--sellb2-gray-700:#454857;--sellb2-gray-900:#242633;
+  --sellb2-pink:#d38ab9;--sellb2-pink-soft:#f5e7f0;--sellb2-indigo:#6875d8;--sellb2-violet:#8a6bd1;
+  --sellb2-gradient:linear-gradient(115deg,#c887ad 0%,#a978c5 45%,#7079d9 100%);
+  --sellb2-gradient-soft:linear-gradient(115deg,#f7e9f1 0%,#eee9f8 52%,#e9ecfb 100%);
+  --sellb2-shadow:0 12px 32px rgba(83,72,126,.10);
+  --bg:var(--sellb2-gray-50);--surface:#fff;--surface2:#f1f1f6;--text:var(--sellb2-gray-900);--muted:var(--sellb2-gray-500);
+  --line:var(--sellb2-gray-200);--navy:#5d5b9f;--accent:var(--sellb2-indigo);--accent2:var(--sellb2-violet);--shadow:var(--sellb2-shadow);
 }
 
-/* Core surfaces and typography */
-body{background:var(--sellb2-gray-50)!important;color:var(--sellb2-gray-900)!important}
-header,.header,.topbar,.navbar,.nav,.appbar,.toolbar{background:rgba(255,255,255,.96)!important;color:var(--sellb2-gray-900)!important;border-color:var(--sellb2-gray-200)!important}
-button,.btn,[role="button"]{border-color:var(--sellb2-gray-300)!important}
-button.primary,.btn.primary,.primary,.cta,.sellbtn,[class*="primary"]{background:var(--sellb2-gradient)!important;color:#fff!important;border-color:transparent!important}
-
-/* Common accent text / links */
-a,.link,.accent,[class*="accent"]{color:var(--sellb2-indigo)!important}
-
-/* Cards, inputs and separators */
-.card,.listing-card,.panel,.box,.modal,.sheet,.profilemenu,.searchbar,.formcard{border-color:var(--sellb2-gray-200)!important}
-input,select,textarea{border-color:var(--sellb2-gray-300)!important;background:#fff!important;color:var(--sellb2-gray-900)!important}
-input:focus,select:focus,textarea:focus{border-color:var(--sellb2-pink-indigo-2)!important;box-shadow:0 0 0 3px rgba(123,111,214,.14)!important;outline:none!important}
-
-/* Category and marketplace accents */
-.category,.cat,.category-card,.sellb2-ref-cat{background:#fff!important;border-color:var(--sellb2-gray-200)!important}
-.category:hover,.cat:hover,.category-card:hover,.sellb2-ref-cat:hover{border-color:#b79bc1!important;background:var(--sellb2-soft-gradient)!important}
-.active,.selected,.is-active{border-color:var(--sellb2-pink-indigo)!important;color:var(--sellb2-indigo)!important}
-
-/* Header/menu accents */
-.menu,.drawer,.sidemenu{background:#fff!important;color:var(--sellb2-gray-900)!important}
-.menu button:hover,.drawer button:hover,.sidemenu button:hover{background:var(--sellb2-soft-gradient)!important}
-
-/* SELLB2 brand: keep supplied logo artwork, but make generic accent elements match */
-.brand-accent,.brand-gradient,.gradient{background:var(--sellb2-gradient)!important}
-
-/* Bottom navigation / floating actions */
-.bottomnav,.bottom-nav,.tabbar,.fab{border-color:var(--sellb2-gray-200)!important}
-.bottomnav .active,.bottom-nav .active,.tabbar .active{color:var(--sellb2-indigo)!important}
-
-/* Dark mode remains dark, with the new accent family */
-body.dark,body[data-theme="dark"]{background:#1f2027!important;color:#f1f2f5!important}
-body.dark header,body.dark .header,body.dark .menu,body.dark .drawer,body[data-theme="dark"] header,body[data-theme="dark"] .header,body[data-theme="dark"] .menu,body[data-theme="dark"] .drawer{background:#292b34!important;color:#f1f2f5!important;border-color:#414451!important}
-body.dark input,body.dark select,body.dark textarea,body[data-theme="dark"] input,body[data-theme="dark"] select,body[data-theme="dark"] textarea{background:#292b34!important;color:#f1f2f5!important;border-color:#4b4f5d!important}
-
-/* Splash / loading screen */
-#boot{background:var(--sellb2-gradient)!important}
-
-/* Mobile polish */
-@media(max-width:600px){
-  button.primary,.btn.primary,.primary,.cta,.sellbtn,[class*="primary"]{box-shadow:0 8px 20px rgba(123,111,214,.18)!important}
+/* LIGHT MODE ONLY. The existing html[data-theme="dark"] palette remains authoritative in dark mode. */
+html:not([data-theme="dark"]) body:not(.dark){
+  background:radial-gradient(circle at 8% 0%,rgba(211,138,185,.10),transparent 27%),radial-gradient(circle at 92% 16%,rgba(112,121,217,.10),transparent 25%),var(--bg)!important;
+  color:var(--text)!important;
 }
+html:not([data-theme="dark"]) .appbar,html:not([data-theme="dark"]) header,html:not([data-theme="dark"]) .header,html:not([data-theme="dark"]) .topbar,html:not([data-theme="dark"]) .navbar,html:not([data-theme="dark"]) .toolbar{
+  background:rgba(255,255,255,.90)!important;color:var(--text)!important;border-color:var(--line)!important;box-shadow:0 4px 20px rgba(86,76,128,.05)!important;
+}
+
+/* Premium hero and major branded surfaces. */
+html:not([data-theme="dark"]) .homehero,html:not([data-theme="dark"]) .profilehero{
+  background:linear-gradient(115deg,#6f668f,#a979b0,#8c78ca,#6875d8,#9c77b8)!important;background-size:260% 260%!important;
+  animation:sellb2GradientFlow 18s ease-in-out infinite alternate!important;box-shadow:0 18px 48px rgba(91,76,137,.20)!important;
+}
+html:not([data-theme="dark"]) .homehero h1 em{color:#f0dcff!important}
+
+/* All important actions flow through the same soft pink-indigo palette. */
+html:not([data-theme="dark"]) .btn.primary,html:not([data-theme="dark"]) button.primary,html:not([data-theme="dark"]) .primary,html:not([data-theme="dark"]) .cta,html:not([data-theme="dark"]) .sellbtn{
+  background:var(--sellb2-gradient)!important;background-size:220% 220%!important;color:#fff!important;border:0!important;
+  box-shadow:0 9px 22px rgba(112,103,195,.20)!important;animation:sellb2ButtonFlow 11s ease-in-out infinite alternate!important;
+}
+html:not([data-theme="dark"]) .btn.ghost,html:not([data-theme="dark"]) .signin{
+  background:linear-gradient(135deg,#fff,#faf7fc)!important;border-color:#dedbe8!important;box-shadow:0 5px 16px rgba(90,78,129,.06)!important;
+}
+
+/* Search and form surfaces. */
+html:not([data-theme="dark"]) .searchbar,html:not([data-theme="dark"]) .filterbox,html:not([data-theme="dark"]) .editform,html:not([data-theme="dark"]) .authbox,html:not([data-theme="dark"]) .formcard{
+  border-color:#dedce8!important;background:rgba(255,255,255,.94)!important;box-shadow:var(--sellb2-shadow)!important;
+}
+html:not([data-theme="dark"]) input,html:not([data-theme="dark"]) select,html:not([data-theme="dark"]) textarea,html:not([data-theme="dark"]) .field{
+  background:#fff!important;color:var(--text)!important;border-color:#d8d6e3!important;
+}
+html:not([data-theme="dark"]) input:focus,html:not([data-theme="dark"]) select:focus,html:not([data-theme="dark"]) textarea:focus,html:not([data-theme="dark"]) .field:focus{
+  border-color:#9b84d6!important;box-shadow:0 0 0 4px rgba(155,132,214,.13)!important;
+}
+
+/* Category cards: cute pastel surfaces without looking childish. */
+html:not([data-theme="dark"]) .categories button,html:not([data-theme="dark"]) .sellb2-ref-cat,html:not([data-theme="dark"]) .category,html:not([data-theme="dark"]) .cat,html:not([data-theme="dark"]) .category-card{
+  background:linear-gradient(145deg,#fff 0%,#fcf9fd 58%,#f4f2fb 100%)!important;border:1px solid #e5e1ec!important;color:#303344!important;
+  box-shadow:0 8px 20px rgba(86,76,128,.07)!important;transition:transform .35s ease,box-shadow .35s ease,border-color .35s ease,background .5s ease!important;
+}
+html:not([data-theme="dark"]) .categories button:hover,html:not([data-theme="dark"]) .sellb2-ref-cat:hover,html:not([data-theme="dark"]) .category-card:hover{
+  transform:translateY(-2px)!important;border-color:#c9b7df!important;background:var(--sellb2-gradient-soft)!important;box-shadow:0 12px 26px rgba(100,83,146,.12)!important;
+}
+
+/* Real line-art category icons get distinct soft color families. */
+html:not([data-theme="dark"]) .sellb2-ref-cat .ico{background:linear-gradient(145deg,#fff,#f7f2fa)!important;border:1px solid #e6deec!important;box-shadow:0 8px 18px rgba(87,75,126,.10)!important}
+html:not([data-theme="dark"]) .sellb2-ref-cat:nth-child(5n+1) .ico{color:#e15d70!important;background:linear-gradient(145deg,#fff3f3,#f9e8ed)!important}
+html:not([data-theme="dark"]) .sellb2-ref-cat:nth-child(5n+2) .ico{color:#e49b38!important;background:linear-gradient(145deg,#fff8e8,#f8efe1)!important}
+html:not([data-theme="dark"]) .sellb2-ref-cat:nth-child(5n+3) .ico{color:#6c70d8!important;background:linear-gradient(145deg,#f1f1ff,#ebeafb)!important}
+html:not([data-theme="dark"]) .sellb2-ref-cat:nth-child(5n+4) .ico{color:#6a9a78!important;background:linear-gradient(145deg,#eff9f0,#e7f1e9)!important}
+html:not([data-theme="dark"]) .sellb2-ref-cat:nth-child(5n+5) .ico{color:#c66f9d!important;background:linear-gradient(145deg,#fff0f7,#f5e9f2)!important}
+
+/* Listing cards and metadata. */
+html:not([data-theme="dark"]) .sellb2-ref-card,html:not([data-theme="dark"]) .property-card{
+  background:linear-gradient(145deg,#fff,#fcfbfd)!important;border-color:#e5e2eb!important;box-shadow:0 10px 28px rgba(82,72,120,.09)!important;
+}
+html:not([data-theme="dark"]) .sellb2-ref-meta span,html:not([data-theme="dark"]) .stats span{background:linear-gradient(135deg,#f5edf5,#eef0fb)!important;color:#676a7c!important}
+html:not([data-theme="dark"]) .sellb2-ref-body strong,html:not([data-theme="dark"]) .pc-body>strong{color:#a45d9b!important}
+
+/* Links, chips, profile and navigation. */
+html:not([data-theme="dark"]) a,html:not([data-theme="dark"]) .link,html:not([data-theme="dark"]) .sectionhead button,html:not([data-theme="dark"]) .bottomnav button.on,html:not([data-theme="dark"]) .bottomnav .active{color:#6571cf!important}
+html:not([data-theme="dark"]) .chips button.on{background:linear-gradient(135deg,#6f659f,#7f6fbd)!important;border-color:transparent!important;color:#fff!important;box-shadow:0 6px 16px rgba(104,94,158,.18)!important}
+html:not([data-theme="dark"]) .profilemenu,html:not([data-theme="dark"]) .drawer{background:rgba(255,255,255,.97)!important;border-color:#e1deea!important;box-shadow:0 18px 45px rgba(78,67,112,.13)!important}
+html:not([data-theme="dark"]) .profilemenu button:hover,html:not([data-theme="dark"]) .drawer>button:not(.drawerclose):hover{background:var(--sellb2-gradient-soft)!important}
+html:not([data-theme="dark"]) .bottomnav{background:rgba(255,255,255,.91)!important;border-top-color:#e2deea!important;box-shadow:0 -8px 24px rgba(80,69,117,.06)!important}
+
+@keyframes sellb2GradientFlow{0%{background-position:0% 50%}50%{background-position:55% 35%}100%{background-position:100% 55%}}
+@keyframes sellb2ButtonFlow{0%{background-position:0% 50%}100%{background-position:100% 50%}}
+@media(prefers-reduced-motion:reduce){html:not([data-theme="dark"]) .homehero,html:not([data-theme="dark"]) .profilehero,html:not([data-theme="dark"]) .btn.primary{animation:none!important}}
