@@ -1,32 +1,22 @@
-/* SELLB2 category icon refinement — property, business and truck icons */
+/* SELLB2 — full-color marketplace category icons */
 (function(){
-  'use strict';
-  const ICONS={
-    property:'<svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><path d="M7 22.5 24 8l17 14.5V41H7Z" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linejoin="round"/><path d="M18 41V27h12v14M20 18h8" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linejoin="round"/></svg>',
-    vehicle:'<svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><path d="M5 15h23v17H5zM28 21h7l7 7v4H28z" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linejoin="round"/><path d="M12 32a5 5 0 1 0 10 0M34 32a5 5 0 1 0 10 0M28 26h8" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/><path d="M8 20h12" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/></svg>',
-    business:'<svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><path d="M7 19h34v22H7zM5 19l4-11h30l4 11" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linejoin="round"/><path d="M5 19c0 3 2.2 5 5 5s5-2 5-5c0 3 2.2 5 5 5s5-2 5-5c0 3 2.2 5 5 5s5-2 5-5c0 3 2.2 5 5 5s5-2 5-5M18 41V30h12v11" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linejoin="round"/></svg>'
-  };
-  function addStyle(){
-    if(document.getElementById('sellb2-category-icon-style'))return;
-    const s=document.createElement('style');s.id='sellb2-category-icon-style';
-    s.textContent='.categories.large>button>i{display:grid;place-items:center}.categories.large>button>i svg{width:48px;height:48px;display:block;overflow:visible}';
-    document.head.appendChild(s);
-  }
-  function apply(){
-    addStyle();
-    document.querySelectorAll('.categories.large > button').forEach(function(btn){
-      const text=(btn.querySelector('span')?.textContent||'').trim().toLowerCase();
-      const key=text==='properties'?'property':text==='vehicles'?'vehicle':text==='businesses'?'business':null;
-      if(!key)return;
-      const slot=btn.querySelector('i');
-      if(slot && slot.dataset.sellb2Icon!==key){
-        slot.innerHTML=ICONS[key];
-        slot.dataset.sellb2Icon=key;
-        slot.setAttribute('aria-label',text);
-      }
-    });
-  }
-  const observer=new MutationObserver(apply);
-  observer.observe(document.documentElement,{childList:true,subtree:true});
-  apply();
+'use strict';
+const I={
+cars:'<svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="c1" x1="0" x2="1"><stop stop-color="#e53935"/><stop offset="1" stop-color="#ff7043"/></linearGradient></defs><path d="M10 36l5-14c1-3 3-5 7-5h20c4 0 6 2 8 5l5 14v10H10z" fill="url(#c1)"/><path d="M17 28h34l-3-7H20z" fill="#90caf9"/><circle cx="20" cy="47" r="6" fill="#263238"/><circle cx="48" cy="47" r="6" fill="#263238"/><circle cx="20" cy="47" r="2" fill="#cfd8dc"/><circle cx="48" cy="47" r="2" fill="#cfd8dc"/><rect x="13" y="36" width="9" height="4" rx="2" fill="#ffeb3b"/><rect x="46" y="36" width="9" height="4" rx="2" fill="#ffeb3b"/></svg>',
+bikes:'<svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="b1" x1="0" x2="1"><stop stop-color="#d32f2f"/><stop offset="1" stop-color="#ff9800"/></linearGradient></defs><circle cx="17" cy="45" r="10" fill="none" stroke="#263238" stroke-width="4"/><circle cx="49" cy="45" r="10" fill="none" stroke="#263238" stroke-width="4"/><path d="M17 45l12-17 9 17 11-17M29 28h11l5 7H34zM29 28l-5-7h8l7 7" fill="none" stroke="#263238" stroke-width="4" stroke-linejoin="round"/><path d="M27 29l13-5 7 5-7 8H27z" fill="url(#b1)"/></svg>',
+electronics:'<svg viewBox="0 0 64 64" aria-hidden="true"><rect x="18" y="5" width="28" height="54" rx="6" fill="#263238"/><rect x="21" y="10" width="22" height="41" rx="3" fill="#42a5f5"/><path d="M23 13h18v27H23z" fill="#7e57c2"/><circle cx="32" cy="55" r="2" fill="#eceff1"/><path d="M26 17h12M26 22h9M26 28h12" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".9"/></svg>',
+jobs:'<svg viewBox="0 0 64 64" aria-hidden="true"><rect x="9" y="19" width="46" height="35" rx="6" fill="#1976d2"/><path d="M24 19v-5c0-3 2-5 5-5h6c3 0 5 2 5 5v5" fill="#42a5f5" stroke="#1565c0" stroke-width="3"/><rect x="9" y="30" width="46" height="8" fill="#90caf9"/><circle cx="32" cy="34" r="4" fill="#ffd54f"/></svg>',
+furniture:'<svg viewBox="0 0 64 64" aria-hidden="true"><rect x="12" y="25" width="40" height="20" rx="6" fill="#b86b2f"/><rect x="16" y="18" width="32" height="15" rx="5" fill="#d98a42"/><path d="M17 43v13M47 43v13M22 43v10M42 43v10" stroke="#6d3f1f" stroke-width="5" stroke-linecap="round"/><path d="M20 22h24" stroke="#f5b66a" stroke-width="3" stroke-linecap="round"/></svg>',
+fashion:'<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M24 10l8 6 8-6 13 10-7 11-6-4v28H24V27l-6 4-7-11z" fill="#29b6f6"/><path d="M24 10c0 6 3 9 8 9s8-3 8-9" fill="#ef5350"/><path d="M18 31l-6-11 12-10" fill="none" stroke="#1565c0" stroke-width="2"/></svg>',
+books:'<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M10 14h34c4 0 7 3 7 7v34H17c-4 0-7-3-7-7z" fill="#3949ab"/><path d="M17 14v34c0 4 3 7 7 7h27" fill="#ef5350"/><path d="M18 19h24M18 26h24M18 33h18" stroke="#fff" stroke-width="3" stroke-linecap="round"/><path d="M14 54h37" stroke="#ffca28" stroke-width="4"/></svg>',
+commercial:'<svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="t1" x1="0" x2="1"><stop stop-color="#f9a825"/><stop offset="1" stop-color="#fb8c00"/></linearGradient></defs><path d="M7 20h34v28H7z" fill="url(#t1)"/><path d="M41 29h10l6 7v12H41z" fill="#42a5f5"/><path d="M45 32h6l3 5H45z" fill="#bbdefb"/><circle cx="18" cy="50" r="7" fill="#263238"/><circle cx="48" cy="50" r="7" fill="#263238"/><circle cx="18" cy="50" r="2" fill="#cfd8dc"/><circle cx="48" cy="50" r="2" fill="#cfd8dc"/><path d="M12 27h24" stroke="#ffe082" stroke-width="3"/></svg>',
+realestate:'<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M7 31L32 9l25 22v25H7z" fill="#ef5350"/><path d="M13 29L32 13l19 16v21H13z" fill="#ffcc80"/><path d="M26 50V36h12v14" fill="#42a5f5"/><rect x="18" y="33" width="7" height="7" rx="1" fill="#90caf9"/><rect x="39" y="33" width="7" height="7" rx="1" fill="#90caf9"/></svg>',
+business:'<svg viewBox="0 0 64 64" aria-hidden="true"><rect x="10" y="20" width="44" height="38" rx="3" fill="#78909c"/><rect x="16" y="11" width="32" height="12" rx="2" fill="#42a5f5"/><path d="M20 29h7v7h-7zM37 29h7v7h-7zM20 42h7v7h-7zM37 42h7v7h-7z" fill="#fff"/><rect x="28" y="42" width="8" height="16" fill="#ffca28"/><path d="M10 20h44" stroke="#1565c0" stroke-width="3"/></svg>'
+};
+window.SELLB2_CATEGORY_ICONS=I;
+function addStyle(){if(document.getElementById('sellb2-category-icon-style'))return;const s=document.createElement('style');s.id='sellb2-category-icon-style';s.textContent='.categories.large>button>i,.postchooser [data-pc-cat]>i{display:grid;place-items:center;background:#fff!important}.categories.large>button>i svg,.postchooser [data-pc-cat]>i svg{width:50px;height:50px;display:block;overflow:visible}.postchooser [data-pc-cat]>i{width:52px!important;height:52px!important;border-radius:16px!important;font-style:normal!important;font-size:0!important}.postchooser [data-pc-cat]>i svg{width:44px;height:44px}@media(max-width:520px){.postchooser [data-pc-cat]>i{width:48px!important;height:48px!important}.postchooser [data-pc-cat]>i svg{width:40px;height:40px}}';document.head.appendChild(s)}
+function home(){document.querySelectorAll('.categories.large>button').forEach(function(btn){const text=(btn.querySelector('span')?.textContent||'').trim().toLowerCase();const key=text==='properties'?'realestate':text==='vehicles'?'commercial':text==='businesses'?'business':({cars:'cars',bikes:'bikes',electronics:'electronics',jobs:'jobs',furniture:'furniture',fashion:'fashion',books:'books',commercial:'commercial','real estate':'realestate',business:'business'}[text]||null);if(!key)return;const slot=btn.querySelector('i');if(slot&&slot.dataset.sellb2Icon!==key){slot.innerHTML=I[key];slot.dataset.sellb2Icon=key}})}
+function post(){document.querySelectorAll('.postchooser [data-pc-cat]').forEach(function(btn){const key=btn.dataset.pcCat;const slot=btn.querySelector('i');if(slot&&I[key]&&slot.dataset.sellb2Icon!==key){slot.innerHTML=I[key];slot.dataset.sellb2Icon=key}})}
+function apply(){addStyle();home();post()}
+new MutationObserver(apply).observe(document.documentElement,{childList:true,subtree:true});apply();
 })();
