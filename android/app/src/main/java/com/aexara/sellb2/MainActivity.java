@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 import android.webkit.CookieManager;
 import android.webkit.RenderProcessGoneDetail;
@@ -31,6 +30,8 @@ public class MainActivity extends Activity {
     private WebView webView;
     private ValueCallback<Uri[]> fileChooserCallback;
     private View splash;
+    private FrameLayout root;
+    private boolean recoveringRenderer = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,77 +39,91 @@ public class MainActivity extends Activity {
         configureSystemBars();
         WebView.setWebContentsDebuggingEnabled(false);
 
-        FrameLayout root = new FrameLayout(this);
+        root = new FrameLayout(this);
         root.setBackgroundColor(BG);
         setContentView(root);
+        createSplash(root);
 
         try {
-            webView = new WebView(this);
-            webView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-            webView.setBackgroundColor(BG);
-            webView.getSettings().setJavaScriptEnabled(true);
-            webView.getSettings().setDomStorageEnabled(true);
-            webView.getSettings().setDatabaseEnabled(true);
-            webView.getSettings().setAllowFileAccess(true);
-            webView.getSettings().setAllowContentAccess(true);
-            webView.getSettings().setMediaPlaybackRequiresUserGesture(true);
-            webView.getSettings().setSupportMultipleWindows(false);
-            webView.getSettings().setBuiltInZoomControls(false);
-            webView.getSettings().setDisplayZoomControls(false);
-            webView.getSettings().setJavaScriptCanOpenWindowsAutomatically(false);
-            webView.getSettings().setUserAgentString(webView.getSettings().getUserAgentString() + " SELLB2-Android/1.7");
-            CookieManager.getInstance().setAcceptCookie(true);
-            CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
-
-            webView.setWebViewClient(new WebViewClient() {
-                @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                    String scheme = request.getUrl().getScheme();
-                    if ("http".equalsIgnoreCase(scheme) || "https".equalsIgnoreCase(scheme)) return false;
-                    try { startActivity(new Intent(Intent.ACTION_VIEW, request.getUrl())); } catch (Exception ignored) { }
-                    return true;
-                }
-                @Override public void onPageFinished(WebView view, String url) {
-                    super.onPageFinished(view, url);
-                    hideSplash();
-                }
-                @Override public boolean onRenderProcessGone(WebView view, RenderProcessGoneDetail detail) {
-                    if (fileChooserCallback != null) fileChooserCallback.onReceiveValue(null);
-                    fileChooserCallback = null;
-                    showRendererRecovery();
-                    return true;
-                }
-            });
-
-            webView.setWebChromeClient(new WebChromeClient() {
-                @Override public boolean onShowFileChooser(WebView view, ValueCallback<Uri[]> callback, FileChooserParams params) {
-                    if (fileChooserCallback != null) fileChooserCallback.onReceiveValue(null);
-                    fileChooserCallback = callback;
-                    try {
-                        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-                        intent.addCategory(Intent.CATEGORY_OPENABLE);
-                        intent.setType(resolveMimeType(params));
-                        boolean multiple = params != null && params.getMode() == FileChooserParams.MODE_OPEN_MULTIPLE;
-                        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, multiple);
-                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
-                        startActivityForResult(intent, FILE_CHOOSER_REQUEST);
-                        return true;
-                    } catch (Exception e) {
-                        fileChooserCallback = null;
-                        return false;
-                    }
-                }
-            });
-
-            root.addView(webView);
-            createSplash(root);
-            if (savedInstanceState == null) webView.loadUrl(HOME_URL);
-            else { webView.restoreState(savedInstanceState); hideSplash(); }
+            createWebView();
+            // Always load the production page on a fresh Activity instance.
+            // Restoring WebView renderer state can revive a corrupted renderer/session.
+            webView.loadUrl(HOME_URL);
         } catch (Throwable fatal) {
-            showStartupRecovery(root);
+            showStartupRecovery();
         }
     }
 
-    private void createSplash(FrameLayout root) {
+    private void createWebView() {
+        webView = new WebView(this);
+        webView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        webView.setBackgroundColor(BG);
+
+        webView.getSettings().setJavaScriptEnabled(true);
+        webView.getSettings().setDomStorageEnabled(true);
+        webView.getSettings().setDatabaseEnabled(true);
+        webView.getSettings().setAllowFileAccess(true);
+        webView.getSettings().setAllowContentAccess(true);
+        webView.getSettings().setMediaPlaybackRequiresUserGesture(true);
+        webView.getSettings().setSupportMultipleWindows(false);
+        webView.getSettings().setBuiltInZoomControls(false);
+        webView.getSettings().setDisplayZoomControls(false);
+        webView.getSettings().setJavaScriptCanOpenWindowsAutomatically(false);
+        webView.getSettings().setUserAgentString(webView.getSettings().getUserAgentString() + " SELLB2-Android/1.8");
+
+        // Keep the renderer important so Android is less likely to reclaim it under memory pressure.
+        if (Build.VERSION.SDK_INT >= 26) {
+            webView.setRendererPriorityPolicy(WebView.RENDERER_PRIORITY_IMPORTANT, true);
+        }
+
+        CookieManager.getInstance().setAcceptCookie(true);
+        CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
+
+        webView.setWebViewClient(new WebViewClient() {
+            @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                String scheme = request.getUrl().getScheme();
+                if ("http".equalsIgnoreCase(scheme) || "https".equalsIgnoreCase(scheme)) return false;
+                try { startActivity(new Intent(Intent.ACTION_VIEW, request.getUrl())); } catch (Exception ignored) { }
+                return true;
+            }
+
+            @Override public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+                hideSplash();
+            }
+
+            @Override public boolean onRenderProcessGone(WebView view, RenderProcessGoneDetail detail) {
+                if (fileChooserCallback != null) fileChooserCallback.onReceiveValue(null);
+                fileChooserCallback = null;
+                recoverRenderer();
+                return true;
+            }
+        });
+
+        webView.setWebChromeClient(new WebChromeClient() {
+            @Override public boolean onShowFileChooser(WebView view, ValueCallback<Uri[]> callback, FileChooserParams params) {
+                if (fileChooserCallback != null) fileChooserCallback.onReceiveValue(null);
+                fileChooserCallback = callback;
+                try {
+                    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                    intent.addCategory(Intent.CATEGORY_OPENABLE);
+                    intent.setType(resolveMimeType(params));
+                    boolean multiple = params != null && params.getMode() == FileChooserParams.MODE_OPEN_MULTIPLE;
+                    intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, multiple);
+                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+                    startActivityForResult(intent, FILE_CHOOSER_REQUEST);
+                    return true;
+                } catch (Exception e) {
+                    fileChooserCallback = null;
+                    return false;
+                }
+            }
+        });
+
+        root.addView(webView);
+    }
+
+    private void createSplash(FrameLayout parent) {
         TextView logo = new TextView(this);
         logo.setText("SELLB2");
         logo.setTextSize(42f);
@@ -119,7 +134,7 @@ public class MainActivity extends Activity {
         logo.setContentDescription("SELLB2");
         logo.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         splash = logo;
-        root.addView(logo);
+        parent.addView(logo);
     }
 
     private void hideSplash() {
@@ -129,20 +144,29 @@ public class MainActivity extends Activity {
         }).start();
     }
 
-    private void showRendererRecovery() {
-        if (splash != null) splash.setVisibility(View.GONE);
-        if (webView != null) webView.setVisibility(View.GONE);
-        TextView recovery = new TextView(this);
-        recovery.setText("SELLB2\n\nThe web engine restarted.\nTap to reload.");
-        recovery.setTextSize(18f);
-        recovery.setTextColor(Color.WHITE);
-        recovery.setGravity(android.view.Gravity.CENTER);
-        recovery.setBackgroundColor(BG);
-        recovery.setOnClickListener(v -> recreate());
-        addContentView(recovery, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+    private void recoverRenderer() {
+        if (recoveringRenderer || root == null || isFinishing()) return;
+        recoveringRenderer = true;
+        if (webView != null) {
+            try { webView.setVisibility(View.GONE); webView.stopLoading(); webView.destroy(); } catch (Throwable ignored) { }
+            webView = null;
+        }
+        root.removeAllViews();
+        createSplash(root);
+        root.postDelayed(() -> {
+            if (isFinishing() || isDestroyed()) return;
+            try {
+                createWebView();
+                webView.loadUrl(HOME_URL);
+                recoveringRenderer = false;
+            } catch (Throwable fatal) {
+                showStartupRecovery();
+            }
+        }, 250);
     }
 
-    private void showStartupRecovery(FrameLayout root) {
+    private void showStartupRecovery() {
+        if (root == null) return;
         root.removeAllViews();
         TextView recovery = new TextView(this);
         recovery.setText("SELLB2\n\nUnable to start the app engine.\nTap to retry.");
@@ -187,11 +211,18 @@ public class MainActivity extends Activity {
             ArrayList<Uri> uris = new ArrayList<>();
             ClipData clipData = data.getClipData();
             if (clipData != null) {
-                for (int i = 0; i < clipData.getItemCount(); i++) if (clipData.getItemAt(i).getUri() != null) uris.add(clipData.getItemAt(i).getUri());
-            } else if (data.getData() != null) uris.add(data.getData());
+                for (int i = 0; i < clipData.getItemCount(); i++) {
+                    Uri uri = clipData.getItemAt(i).getUri();
+                    if (uri != null) uris.add(uri);
+                }
+            } else if (data.getData() != null) {
+                uris.add(data.getData());
+            }
             if (!uris.isEmpty()) {
                 result = uris.toArray(new Uri[0]);
-                for (Uri uri : result) try { getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION); } catch (Exception ignored) { }
+                for (Uri uri : result) {
+                    try { getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION); } catch (Exception ignored) { }
+                }
             }
         }
         if (fileChooserCallback != null) fileChooserCallback.onReceiveValue(result);
@@ -201,14 +232,19 @@ public class MainActivity extends Activity {
     @Override public void onBackPressed() {
         if (webView != null && webView.canGoBack()) webView.goBack(); else super.onBackPressed();
     }
+
     @Override protected void onSaveInstanceState(Bundle outState) {
-        if (webView != null) webView.saveState(outState);
+        // Deliberately do not persist WebView renderer state. A fresh renderer is safer on relaunch.
         super.onSaveInstanceState(outState);
     }
+
     @Override protected void onDestroy() {
         if (fileChooserCallback != null) fileChooserCallback.onReceiveValue(null);
         fileChooserCallback = null;
-        if (webView != null) { webView.stopLoading(); webView.destroy(); }
+        if (webView != null) {
+            try { webView.stopLoading(); webView.destroy(); } catch (Throwable ignored) { }
+            webView = null;
+        }
         super.onDestroy();
     }
 }
