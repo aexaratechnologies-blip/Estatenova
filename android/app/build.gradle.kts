@@ -10,8 +10,8 @@ android {
         applicationId = "com.aexara.sellb2"
         minSdk = 23
         targetSdk = 36
-        versionCode = 8
-        versionName = "1.3.4"
+        versionCode = 9
+        versionName = "2.0"
     }
 
     signingConfigs {
