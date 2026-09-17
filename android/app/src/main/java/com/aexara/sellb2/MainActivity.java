@@ -17,6 +17,7 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -27,7 +28,7 @@ public class MainActivity extends Activity {
     private static final int BG = Color.rgb(7, 11, 22);
     private FrameLayout root;
     private WebView webView;
-    private TextView splash;
+    private View splash;
     private ValueCallback<Uri[]> fileChooserCallback;
 
     @Override
@@ -55,7 +56,7 @@ public class MainActivity extends Activity {
         w.getSettings().setDisplayZoomControls(false);
         w.getSettings().setJavaScriptCanOpenWindowsAutomatically(false);
         w.getSettings().setMediaPlaybackRequiresUserGesture(true);
-        w.getSettings().setUserAgentString(w.getSettings().getUserAgentString() + " SELLB2-Android/2.1");
+        w.getSettings().setUserAgentString(w.getSettings().getUserAgentString() + " SELLB2-Android/2.0");
         CookieManager.getInstance().setAcceptCookie(true);
         CookieManager.getInstance().setAcceptThirdPartyCookies(w, true);
         w.setWebViewClient(new WebViewClient() {
@@ -87,17 +88,19 @@ public class MainActivity extends Activity {
     }
 
     private void showSplash() {
-        splash = new TextView(this);
-        splash.setText("SELLB2");
-        splash.setTextSize(42f);
-        splash.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
-        splash.setGravity(Gravity.CENTER);
-        splash.setTextColor(Color.rgb(241, 243, 248));
-        splash.setBackgroundColor(BG);
-        splash.setContentDescription("SELLB2");
-        splash.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        root.addView(splash);
+        ImageView logo = new ImageView(this);
+        logo.setImageResource(com.aexara.sellb2.R.drawable.sellb2_logo);
+        logo.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        logo.setAdjustViewBounds(true);
+        logo.setContentDescription("SELLB2");
+        logo.setPadding(dp(28), dp(28), dp(28), dp(28));
+        logo.setBackgroundColor(BG);
+        logo.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        splash = logo;
+        root.addView(logo);
     }
+
+    private int dp(int value) { return Math.round(value * getResources().getDisplayMetrics().density); }
 
     private void hideSplash() { if (splash != null) splash.setVisibility(View.GONE); }
 
