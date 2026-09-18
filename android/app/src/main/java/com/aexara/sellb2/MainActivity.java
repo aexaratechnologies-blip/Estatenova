@@ -217,7 +217,7 @@ public class MainActivity extends Activity {
                 int index = contentDisposition.toLowerCase().indexOf(marker);
                 if (index >= 0) {
                     name = contentDisposition.substring(index + marker.length())
-                            .replace(""", "")
+                            .replace("\"", "")
                             .trim();
                 }
             }
@@ -237,7 +237,7 @@ public class MainActivity extends Activity {
             name = "sellb2-download" + (extension == null ? "" : "." + extension);
         }
 
-        return name.replaceAll("[\\/:*?"<>|]", "_");
+        return name.replaceAll("[\\\\/:*?\"<>|]", "_");
     }
 
     private void showSplash() {
