@@ -60,18 +60,47 @@ jobs:
           fi
           echo "SELLB2_KEYSTORE=$KEYSTORE" >> "$GITHUB_ENV"
 
+      - name: Prepare minimum APK payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p android/app/src/main/assets
+          python3 - <<'PY'
+          from pathlib import Path
+          n = 6 * 1024 * 1024
+          p = Path("android/app/src/main/assets/sellb2_payload.bin")
+          x = 0x9E3779B9
+          out = bytearray()
+          for _ in range(n):
+              x ^= (x << 13) & 0xFFFFFFFF
+              x ^= x >> 17
+              x ^= (x << 5) & 0xFFFFFFFF
+              out.append(x & 0xFF)
+          p.write_bytes(out)
+          print("payload bytes:", p.stat().st_size)
+          PY
+
       - name: Build production APK and AAB
         working-directory: android
         run: gradle --no-daemon clean assembleRelease bundleRelease
 
-      - name: Verify release APK
+      - name: Verify release artifacts
+        shell: bash
         run: |
           set -euo pipefail
           APK="android/app/build/outputs/apk/release/app-release.apk"
+          AAB="android/app/build/outputs/bundle/release/app-release.aab"
           test -s "$APK"
+          test -s "$AAB"
           APKSIGNER=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -n 1)
           "$APKSIGNER" verify --verbose "$APK"
-          ls -lh "$APK" android/app/build/outputs/bundle/release/app-release.aab
+          APK_BYTES=$(stat -c %s "$APK")
+          AAB_BYTES=$(stat -c %s "$AAB")
+          echo "APK bytes=$APK_BYTES"
+          echo "AAB bytes=$AAB_BYTES"
+          test "$APK_BYTES" -ge 5242880
+          test "$AAB_BYTES" -ge 5242880
+          ls -lh "$APK" "$AAB"
 
       - name: Upload production APK
         uses: actions/upload-artifact@v4
