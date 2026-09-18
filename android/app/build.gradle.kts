@@ -6,6 +6,10 @@ android {
     namespace = "com.aexara.sellb2"
     compileSdk = 36
 
+    androidResources {
+        noCompress += "bin"
+    }
+
     defaultConfig {
         applicationId = "com.aexara.sellb2"
         minSdk = 23
